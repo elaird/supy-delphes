@@ -11,7 +11,7 @@ def initializeROOT(r, cppFiles=[]):
     r.TH1.SetDefaultSumw2(True)
     r.gErrorIgnoreLevel = 2000
     r.gROOT.SetBatch(True)
-    r.gSystem.Load("../Delphes-3.0.10/libDelphes.so")
+    r.gSystem.Load("libDelphes.so")
 
 
 def useCachedFileLists():
