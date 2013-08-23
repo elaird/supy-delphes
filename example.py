@@ -1,8 +1,6 @@
 import supy, calculables, steps
 import ROOT as r
-
-pb = 1.0
-fb = 1.0e-3*pb
+from units import pb, fb
 
 class example(supy.analysis):
     def weightPlots(self):
@@ -10,6 +8,7 @@ class example(supy.analysis):
                 supy.steps.histos.value("one", 1, 0.0, 2.0, xtitle="1.0 (filled with weight 1.0)", w="one"),
                 supy.steps.histos.value("one", 1, 0.0, 2.0, xtitle="1.0 (filled with event weight)"),
                 supy.steps.histos.value("weight", 100, 0.0, 5.0, xtitle="event weight (filled with weight 1.0)", w="one"),
+                supy.steps.histos.value("HT", 100, 0.0, 5000.0, xtitle="Scalar HT"),
                 ]
 
 
@@ -48,7 +47,7 @@ class example(supy.analysis):
 
     def listOfSteps(self, pars):
         return ([supy.steps.printer.progressPrinter()] +
-                #self.weightPlots() +
+                self.weightPlots() +
                 #self.genParticlePlots() +
                 self.btag(mask=0x1, p="b") +
                 self.btag(mask=0x1, p="c") +
@@ -62,7 +61,7 @@ class example(supy.analysis):
 
     def listOfCalculables(self, pars):
         listOfCalculables = supy.calculables.zeroArgs(supy.calculables)
-        #listOfCalculables += supy.calculables.zeroArgs(calculables)
+        listOfCalculables += supy.calculables.zeroArgs(calculables)
         listOfCalculables += [supy.calculables.other.fixedValue("one", 1.0),
                               calculables.Particles(pids=[-3, -2, -1, 1, 2, 3], label="uds"),
                               calculables.Particles(pids=[-4, 4], label="c"),
@@ -80,39 +79,13 @@ class example(supy.analysis):
                               #calculables.JetMatchedTo(sourceKey="tauParticles"),
                               #calculables.JetMatchedTo(sourceKey="gParticles"),
                               calculables.bTaggedJets(),
+                              calculables.HT(),
                               ]
         return listOfCalculables
 
 
     def listOfSampleDictionaries(self):
-        holder = supy.samples.SampleHolder()
-        holder.add("tt_test", '["/tmp/elaird/ttbar140PU_Phase2.root"]', xs=500*pb)
-        holder.add("tt.conf0_0_600", '["root://eoscms.cern.ch//eos/cms/store/group/phys_higgs/upgrade/PhaseI/Configuration0/140PileUp/tt-4p-0-600-v1510_14TEV/tt-4p-0-600-v1510_14TEV_354724341_PhaseI_Conf0_140PileUp.root"]', xs=500*pb)
-
-        conf3 = "root://eoscms.cern.ch//eos/cms/store/group/phys_higgs/upgrade/PhaseII/Configuration3/140PileUp"
-        holder.add("tt.conf3_0_600",
-                   '["%s/tt-4p-0-600-v1510_14TEV/tt-4p-0-600-v1510_14TEV_102886267_PhaseII_Conf3_140PileUp.root"]' % conf3,
-                   xs=530.89358*pb)
-
-        holder.add("tt.conf3_600_1100",
-                   '["%s/tt-4p-600-1100-v1510_14TEV/tt-4p-600-1100-v1510_14TEV_101308277_PhaseII_Conf3_140PileUp.root"]' % conf3,
-                   xs=42.55351*pb)
-        
-        holder.add("tt.conf3_1100_1700",
-                   '["%s/tt-4p-1100-1700-v1510_14TEV/tt-4p-1100-1700-v1510_14TEV_102571082_PhaseII_Conf3_140PileUp.root"]' % conf3,
-                   xs=4.48209*pb)
-        
-        holder.add("tt.conf3_1700_2500",
-                   '["%s/tt-4p-1700-2500-v1510_14TEV/tt-4p-1700-2500-v1510_14TEV_100102772_PhaseII_Conf3_140PileUp.root"]' % conf3,
-                   xs=0.52795*pb)
-        
-        holder.add("tt.conf3_2500_100000",
-                   '["%s/tt-4p-2500-100000-v1510_14TEV/tt-4p-2500-100000-v1510_14TEV_102665566_PhaseII_Conf3_140PileUp.root"]' % conf3,
-                   xs=0.05449*pb)
-
-        holder.add("hh_bbtt.conf3",
-                   '[%s]' % ",".join(['\"%s/GluGluToHHToBBTT_14TeV/GluGluToHHToBBTT_14TeV_%d.root\"' % (conf3, i) for i in range(4)]),
-                   xs=40.0*fb)
+        from samples import holder
         return [holder]
 
 
@@ -120,10 +93,10 @@ class example(supy.analysis):
         w = calculables.GenWeight()
         return (#supy.samples.specify(names="tt.conf3_0_600", color=r.kBlack, effectiveLumi=0.02/fb) +
                 supy.samples.specify(names="tt.conf3_0_600", weights=w, color=r.kBlue, effectiveLumi=0.02/fb) +
-                #supy.samples.specify(names="tt.conf3_600_1100", color=r.kBlue, effectiveLumi=0.2/fb) +
-                #supy.samples.specify(names="tt.conf3_1100_1700", color=r.kBlue, effectiveLumi=1/fb) +
-                #supy.samples.specify(names="tt.conf3_1700_2500", color=r.kBlue, effectiveLumi=1/fb) +
-                #supy.samples.specify(names="tt.conf3_2500_100000", color=r.kBlue, effectiveLumi=1/fb) +
+                supy.samples.specify(names="tt.conf3_600_1100", weights=w, color=r.kBlue, effectiveLumi=0.2/fb) +
+                supy.samples.specify(names="tt.conf3_1100_1700", weights=w, color=r.kBlue, effectiveLumi=1/fb) +
+                supy.samples.specify(names="tt.conf3_1700_2500", weights=w, color=r.kBlue, effectiveLumi=10/fb) +
+                supy.samples.specify(names="tt.conf3_2500_100000", weights=w, color=r.kBlue, effectiveLumi=10/fb) +
                 supy.samples.specify(names="hh_bbtt.conf3", color=r.kRed, effectiveLumi=200/fb) +
                 []
                 )
@@ -131,11 +104,26 @@ class example(supy.analysis):
 
     def conclude(self, pars):
         org = self.organizer(pars, prefixesNoScale=["efficiency_"])
-        org.mergeSamples(targetSpec={"name":"tt", "color":r.kBlue, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
+        org.mergeSamples(targetSpec={"name":"tt_0_6", "color":r.kBlue, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
                          sources=["tt.conf3_0_600.GenWeight"],
+                         )
+        org.mergeSamples(targetSpec={"name":"tt_6_11", "color":r.kGreen, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
+                         sources=["tt.conf3_600_1100.GenWeight"],
+                         )
+        org.mergeSamples(targetSpec={"name":"tt_11_17", "color":r.kCyan, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
+                         sources=["tt.conf3_1100_1700.GenWeight"],
+                         )
+        org.mergeSamples(targetSpec={"name":"tt_17_25", "color":r.kMagenta, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
+                         sources=["tt.conf3_1700_2500.GenWeight"],
+                         )
+        org.mergeSamples(targetSpec={"name":"tt_25_1k", "color":r.kOrange, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
+                         sources=["tt.conf3_2500_100000.GenWeight"],
                          )
         org.mergeSamples(targetSpec={"name":"hh_bb#tau#tau", "color":r.kRed, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
                          sources=["hh_bbtt.conf3"],
+                         )
+        org.mergeSamples(targetSpec={"name":"tt", "color":r.kBlack, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
+                         sources=["tt_0_6", "tt_6_11", "tt_11_17", "tt_17_25", "tt_25_1k"], keepSources=True,
                          )
 
         #org.mergeSamples(targetSpec={"name":"tt*w", "color":r.kBlue, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
@@ -147,7 +135,7 @@ class example(supy.analysis):
         org.scale(1.0/fb)
         
         supy.plotter(org,
-                     doLog=False,
+                     doLog=True,
                      showStatBox=False,
                      pdfFileName=self.pdfFileName(org.tag),
                      printImperfectCalcPageIfEmpty=False,
