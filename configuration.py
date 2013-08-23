@@ -15,4 +15,4 @@ def initializeROOT(r, cppFiles=[]):
 
 
 def useCachedFileLists():
-    return False
+    return True
