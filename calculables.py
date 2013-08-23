@@ -8,6 +8,11 @@ class GenWeight(wrappedChain.calculable):
         self.value = self.source["Event"][0].Weight
 
 
+class HT(wrappedChain.calculable):
+    def update(self, _):
+        self.value = self.source["ScalarHT"][0].HT
+
+
 class Particles(wrappedChain.calculable):
     @property
     def name(self):
