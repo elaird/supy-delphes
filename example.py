@@ -90,47 +90,57 @@ class example(supy.analysis):
 
 
     def listOfSamples(self, pars):
+        from supy.samples import specify
         w = calculables.GenWeight()
-        return (supy.samples.specify(names="tt.c3_0_600", weights=w, color=r.kBlue, effectiveLumi=0.02/fb) +
-                supy.samples.specify(names="tt.c3_600_1100", weights=w, color=r.kBlue, effectiveLumi=0.2/fb) +
-                supy.samples.specify(names="tt.c3_1100_1700", weights=w, color=r.kBlue, effectiveLumi=1/fb) +
-                supy.samples.specify(names="tt.c3_1700_2500", weights=w, color=r.kBlue, effectiveLumi=10/fb) +
-                supy.samples.specify(names="tt.c3_2500_100000", weights=w, color=r.kBlue, effectiveLumi=10/fb) +
-                supy.samples.specify(names="hh_bbtt.c3", color=r.kRed, effectiveLumi=200/fb) +
+        return (specify(names="tt_0_600", weights=w, color=r.kBlack, effectiveLumi=0.02/fb) +
+                specify(names="tt_600_1100", weights=w, color=r.kBlack, effectiveLumi=0.2/fb) +
+                specify(names="tt_1100_1700", weights=w, color=r.kBlack, effectiveLumi=1/fb) +
+                specify(names="tt_1700_2500", weights=w, color=r.kBlack, effectiveLumi=10/fb) +
+                specify(names="tt_2500_100000", weights=w, color=r.kBlack, effectiveLumi=10/fb) +
+
+                specify(names="BB_0_3",   weights=w, color=r.kBlue, effectiveLumi=0.02/fb) +
+                specify(names="BB_3_7",   weights=w, color=r.kBlue, effectiveLumi=0.2/fb) +
+                specify(names="BB_7_13",  weights=w, color=r.kBlue, effectiveLumi=2/fb) +
+                specify(names="BB_13_21", weights=w, color=r.kBlue, effectiveLumi=2/fb) +
+                #specify(names="BB_21_1k", weights=w, color=r.kBlue, effectiveLumi=2/fb) +
+
+                specify(names="BBB_0_6",   weights=w, color=r.kGreen, effectiveLumi=20/fb) +
+                specify(names="BBB_6_13",  weights=w, color=r.kGreen, effectiveLumi=20/fb) +
+                specify(names="BBB_13_1k", weights=w, color=r.kGreen, effectiveLumi=200/fb) +
+
+                specify(names="hh_bbtt",              color=r.kRed, effectiveLumi=200/fb) +
                 []
                 )
 
 
     def conclude(self, pars):
         org = self.organizer(pars, prefixesNoScale=["efficiency_"])
-        org.mergeSamples(targetSpec={"name":"tt_0_6", "color":r.kBlue, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-                         sources=["tt.c3_0_600.GenWeight"],
-                         )
-        org.mergeSamples(targetSpec={"name":"tt_6_11", "color":r.kGreen, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-                         sources=["tt.c3_600_1100.GenWeight"],
-                         )
-        org.mergeSamples(targetSpec={"name":"tt_11_17", "color":r.kCyan, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-                         sources=["tt.c3_1100_1700.GenWeight"],
-                         )
-        org.mergeSamples(targetSpec={"name":"tt_17_25", "color":r.kMagenta, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-                         sources=["tt.c3_1700_2500.GenWeight"],
-                         )
-        org.mergeSamples(targetSpec={"name":"tt_25_1k", "color":r.kOrange, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-                         sources=["tt.c3_2500_100000.GenWeight"],
-                         )
-        org.mergeSamples(targetSpec={"name":"hh_bb#tau#tau", "color":r.kRed, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-                         sources=["hh_bbtt.c3"],
-                         )
-        org.mergeSamples(targetSpec={"name":"tt", "color":r.kBlack, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-                         sources=["tt_0_6", "tt_6_11", "tt_11_17", "tt_17_25", "tt_25_1k"], keepSources=True,
-                         )
+        def gopts(name="", color=1):
+            return {"name":name, "color":color, "markerStyle":1, "lineWidth":2, "goptions":"ehist"}
 
-        #org.mergeSamples(targetSpec={"name":"tt*w", "color":r.kBlue, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-        #                 sources=["tt.c3_0_600.GenWeight"],
-        #                 )
-        #org.mergeSamples(targetSpec={"name":"tt*1.0", "color":r.kBlack, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-        #                 sources=["tt.c3_0_600"],
-        #                 )
+        #org.mergeSamples(targetSpec=gopts("tt_0_6",   r.kBlue),    sources=["tt_0_6.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("tt_6_11",  r.kGreen),   sources=["tt_6_11.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("tt_11_17", r.kCyan),    sources=["tt_11_17.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("tt_17_25", r.kMagenta), sources=["tt_17_25.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("tt_25_1k", r.kOrange),  sources=["tt_25_1k.GenWeight"])
+        org.mergeSamples(targetSpec=gopts("tt", r.kBlack), allWithPrefix="tt_")
+
+        #org.mergeSamples(targetSpec=gopts("BB_0_3",   r.kGreen),   sources=["BB_0_3.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("BB_3_7",   r.kCyan),    sources=["BB_3_7.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("BB_7_13",  r.kMagenta), sources=["BB_7_13.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("BB_13_21", r.kOrange),  sources=["BB_13_21.GenWeight"])
+        org.mergeSamples(targetSpec=gopts("BB", r.kBlue), allWithPrefix="BB_")
+
+        #org.mergeSamples(targetSpec=gopts("BBB_0_6",   r.kBlue),    sources=["BBB_0_6.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("BBB_6_13",  r.kCyan),    sources=["BBB_6_13.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("BBB_13_1k", r.kMagenta), sources=["BBB_13_1k.GenWeight"])
+        org.mergeSamples(targetSpec=gopts("BBB", r.kGreen), allWithPrefix="BBB_")
+
+        org.mergeSamples(targetSpec=gopts("hh_bb#tau#tau", r.kRed), sources=["hh_bbtt"])
+
+        #org.mergeSamples(targetSpec=gopts("tt*w", r.kBlue), sources=["tt0_600.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("tt*1.0", r.kBlack) sources=["tt0_600"])
+
         org.scale(1.0/fb)
         
         supy.plotter(org,
