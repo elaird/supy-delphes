@@ -85,19 +85,18 @@ class example(supy.analysis):
 
 
     def listOfSampleDictionaries(self):
-        from samples import holder
-        return [holder]
+        from samples import conf3
+        return [conf3]
 
 
     def listOfSamples(self, pars):
         w = calculables.GenWeight()
-        return (#supy.samples.specify(names="tt.conf3_0_600", color=r.kBlack, effectiveLumi=0.02/fb) +
-                supy.samples.specify(names="tt.conf3_0_600", weights=w, color=r.kBlue, effectiveLumi=0.02/fb) +
-                supy.samples.specify(names="tt.conf3_600_1100", weights=w, color=r.kBlue, effectiveLumi=0.2/fb) +
-                supy.samples.specify(names="tt.conf3_1100_1700", weights=w, color=r.kBlue, effectiveLumi=1/fb) +
-                supy.samples.specify(names="tt.conf3_1700_2500", weights=w, color=r.kBlue, effectiveLumi=10/fb) +
-                supy.samples.specify(names="tt.conf3_2500_100000", weights=w, color=r.kBlue, effectiveLumi=10/fb) +
-                supy.samples.specify(names="hh_bbtt.conf3", color=r.kRed, effectiveLumi=200/fb) +
+        return (supy.samples.specify(names="tt.c3_0_600", weights=w, color=r.kBlue, effectiveLumi=0.02/fb) +
+                supy.samples.specify(names="tt.c3_600_1100", weights=w, color=r.kBlue, effectiveLumi=0.2/fb) +
+                supy.samples.specify(names="tt.c3_1100_1700", weights=w, color=r.kBlue, effectiveLumi=1/fb) +
+                supy.samples.specify(names="tt.c3_1700_2500", weights=w, color=r.kBlue, effectiveLumi=10/fb) +
+                supy.samples.specify(names="tt.c3_2500_100000", weights=w, color=r.kBlue, effectiveLumi=10/fb) +
+                supy.samples.specify(names="hh_bbtt.c3", color=r.kRed, effectiveLumi=200/fb) +
                 []
                 )
 
@@ -105,32 +104,32 @@ class example(supy.analysis):
     def conclude(self, pars):
         org = self.organizer(pars, prefixesNoScale=["efficiency_"])
         org.mergeSamples(targetSpec={"name":"tt_0_6", "color":r.kBlue, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-                         sources=["tt.conf3_0_600.GenWeight"],
+                         sources=["tt.c3_0_600.GenWeight"],
                          )
         org.mergeSamples(targetSpec={"name":"tt_6_11", "color":r.kGreen, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-                         sources=["tt.conf3_600_1100.GenWeight"],
+                         sources=["tt.c3_600_1100.GenWeight"],
                          )
         org.mergeSamples(targetSpec={"name":"tt_11_17", "color":r.kCyan, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-                         sources=["tt.conf3_1100_1700.GenWeight"],
+                         sources=["tt.c3_1100_1700.GenWeight"],
                          )
         org.mergeSamples(targetSpec={"name":"tt_17_25", "color":r.kMagenta, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-                         sources=["tt.conf3_1700_2500.GenWeight"],
+                         sources=["tt.c3_1700_2500.GenWeight"],
                          )
         org.mergeSamples(targetSpec={"name":"tt_25_1k", "color":r.kOrange, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-                         sources=["tt.conf3_2500_100000.GenWeight"],
+                         sources=["tt.c3_2500_100000.GenWeight"],
                          )
         org.mergeSamples(targetSpec={"name":"hh_bb#tau#tau", "color":r.kRed, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-                         sources=["hh_bbtt.conf3"],
+                         sources=["hh_bbtt.c3"],
                          )
         org.mergeSamples(targetSpec={"name":"tt", "color":r.kBlack, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
                          sources=["tt_0_6", "tt_6_11", "tt_11_17", "tt_17_25", "tt_25_1k"], keepSources=True,
                          )
 
         #org.mergeSamples(targetSpec={"name":"tt*w", "color":r.kBlue, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-        #                 sources=["tt.conf3_0_600.GenWeight"],
+        #                 sources=["tt.c3_0_600.GenWeight"],
         #                 )
         #org.mergeSamples(targetSpec={"name":"tt*1.0", "color":r.kBlack, "markerStyle":1, "lineWidth":2, "goptions":"ehist"},
-        #                 sources=["tt.conf3_0_600"],
+        #                 sources=["tt.c3_0_600"],
         #                 )
         org.scale(1.0/fb)
         
