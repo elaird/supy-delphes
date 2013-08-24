@@ -83,12 +83,19 @@ class efficiencyHistogrammer(analysisStep):
         print "Output updated with efficiency %s." % self.effTitle[0]
 
 
-class jetHistogrammer(analysisStep):
-    def __init__(self, var="", nBins=None, xMin=None, xMax=None):
-        self.var = var
+class iterHistogrammer(analysisStep):
+    def __init__(self, var="", attr="", labelIndex=False, maxIndex=None, nBins=None, xMin=None, xMax=None):
+        for item in ["var", "attr", "labelIndex", "maxIndex"]:
+            setattr(self, item, eval(item))
         self.bins = (nBins, xMin, xMax)
 
     def uponAcceptance(self, eventVars):
-        for jet in eventVars["Jet"]:
-            self.book.fill(getattr(jet, self.var), self.var, *self.bins, title=";%s;jets / bin" % self.var)
-
+        for i, object in enumerate(eventVars[self.var]):
+            if (self.maxIndex is not None) and self.maxIndex < i:
+                continue
+            key = self.attr
+            yTitle = self.var
+            if self.labelIndex:
+                key += " (%s %d)" % (self.var, i)
+                yTitle = "Events"
+            self.book.fill(getattr(object, self.attr), key, *self.bins, title=";%s;%s / bin" % (key, yTitle))
