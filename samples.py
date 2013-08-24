@@ -27,7 +27,9 @@ conf3.add("tt_1100_1700",   c3("tt-4p-1100-1700-v1510_14TEV"),   xs=4.48209*pb)
 conf3.add("tt_1700_2500",   c3("tt-4p-1700-2500-v1510_14TEV"),   xs=0.52795*pb)
 conf3.add("tt_2500_100000", c3("tt-4p-2500-100000-v1510_14TEV"), xs=0.05449*pb)
 
-conf3.add("hh_bbtt", c3("GluGluToHHToBBTT_14TeV", skip=["GluGluToHHToBBTT_14TeV_10.root"]), xs=2.5*fb)
+conf3.add("hh_bbtt", c3("GluGluToHHToBBTT_14TeV",
+                        skip=["_4.", "_10.", "_21.", "_23.", "_24.", "_35.", "_37.", "_39.", "_44.", "_48.", "_49."]),
+          xs=2.5*fb)
 
 conf3.add("BB_0_3",    c3("BB-4p-0-300-v1510_14TEV"),        xs=249.97710*pb)
 conf3.add("BB_3_7",    c3("BB-4p-300-700-v1510_14TEV"),      xs=35.23062*pb)
