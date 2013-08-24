@@ -1,19 +1,36 @@
 import utils
 import ROOT as r
-from supy import wrappedChain
+import supy
 
-
-class GenWeight(wrappedChain.calculable):
+class GenWeight(supy.wrappedChain.calculable):
     def update(self, _):
         self.value = self.source["Event"][0].Weight
 
 
-class HT(wrappedChain.calculable):
+class HT(supy.wrappedChain.calculable):
     def update(self, _):
         self.value = self.source["ScalarHT"][0].HT
 
 
-class Particles(wrappedChain.calculable):
+class SumP4(supy.wrappedChain.calculable):
+    @property
+    def name(self):
+        return "%sSumP4" % self.label
+
+    def __init__(self, label=""):
+        self.label = label
+        self.value = supy.utils.LorentzV()
+        self.vec = supy.utils.LorentzV()
+
+    def update(self, _):
+        self.value.SetCoordinates(0.0, 0.0, 0.0, 0.0)
+
+        for particle in self.source[self.label]:
+            self.vec.SetCoordinates(particle.PT, particle.Eta, particle.Phi, particle.Mass)
+            self.value += self.vec
+
+
+class Particles(supy.wrappedChain.calculable):
     @property
     def name(self):
         return "%sParticles" % self.label
@@ -31,7 +48,7 @@ class Particles(wrappedChain.calculable):
                 self.value.append(particle)
 
 
-class bTaggedJets(wrappedChain.calculable):
+class bTaggedJets(supy.wrappedChain.calculable):
     def update(self, _):
         print "add mask"
         self.value = []
@@ -40,7 +57,7 @@ class bTaggedJets(wrappedChain.calculable):
                 self.value.append(jet)
 
 
-class JetMatchedTo(wrappedChain.calculable):
+class JetMatchedTo(supy.wrappedChain.calculable):
     @property
     def name(self):
         return "JetMatchedTo_%s" % self.sourceKey
