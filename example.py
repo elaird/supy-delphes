@@ -1,6 +1,9 @@
-import supy, calculables, steps
-import ROOT as r
+import math
+import supy
+import calculables
+import steps
 from units import pb, fb
+import ROOT as r
 
 class example(supy.analysis):
     def weightPlots(self):
@@ -28,7 +31,7 @@ class example(supy.analysis):
 
 
     def btag(self, mask=0, p=""):
-        return [#steps.jetHistogrammer(var="BTag", nBins=5, xMin=-0.5, xMax=4.5)+
+        return [#steps.iterHistogrammer(var="Jet", attr="BTag", labelIndex=False, nBins=5, xMin=-0.5, xMax=4.5),
                 #supy.steps.histos.multiplicity("JetMatchedTo_%sParticles" % p),
                 steps.matchHistogrammer("JetMatchedTo_%sParticles" % p),
                 steps.matchHistogrammer("JetMatchedTo_%sParticles" % p, maxDR=0.3),
@@ -54,17 +57,48 @@ class example(supy.analysis):
                 supy.steps.histos.Rapidity("btauParticlesSumP4", 20, -4.0, 4.0),
                 ]
 
+    def particleAcceptancePlots(self):
+        return [steps.iterHistogrammer(var="bParticles", attr="PT", nBins=50, xMin=0.0, xMax=200.0),
+                steps.iterHistogrammer(var="bParticles", attr="Eta", nBins=50, xMin=-5.0, xMax=5.0),
+                steps.iterHistogrammer(var="tauParticles", attr="PT", nBins=50, xMin=0.0, xMax=200.0),
+                steps.iterHistogrammer(var="tauParticles", attr="Eta", nBins=50, xMin=-5.0, xMax=5.0),
+                steps.iterHistogrammer(var="btauParticles", attr="PT", nBins=50, xMin=0.0, xMax=200.0),
+                steps.iterHistogrammer(var="btauParticles", attr="Eta", nBins=50, xMin=-5.0, xMax=5.0),
+                ]
+
+    def genSelection(self):
+        return [supy.steps.filters.multiplicity("bParticles", min=2),
+                supy.steps.filters.multiplicity("tauParticles", min=2),
+
+                #steps.modEntry(base=4, value=0),
+                steps.modEntry(base=8, value=0),
+                supy.steps.filters.multiplicity("tauKineParticles", min=2, max=2),
+
+                supy.steps.histos.mass("tauParticlesSumP4", 60, 0.0, 300.0),
+                supy.steps.filters.mass("tauParticlesSumP4", min=100., max=150.),
+
+                supy.steps.filters.multiplicity("bKineParticles", min=2, max=2),
+                supy.steps.histos.mass("bParticlesSumP4", 60, 0.0, 300.0),
+                supy.steps.filters.mass("bParticlesSumP4", min=112.5, max=137.5),
+
+                supy.steps.histos.mass("btauParticlesSumP4", 40, 200.0, 1000.0),
+                supy.steps.filters.mass("btauParticlesSumP4", min=350.0),
+
+                supy.steps.histos.pt("bParticlesSumP4", 50, 0.0, 500.0),
+                supy.steps.filters.pt("bParticlesSumP4", min=100.0),
+
+                supy.steps.histos.pt("tauParticlesSumP4", 50, 0.0, 500.0),
+                supy.steps.filters.pt("tauParticlesSumP4", min=100.0),
+
+                ]
+
     def listOfSteps(self, pars):
         return ([supy.steps.printer.progressPrinter()] +
                 self.weightPlots() +
                 self.genParticlePlots() +
-                [supy.steps.filters.multiplicity("bParticles", min=2, max=2),
-                 supy.steps.filters.multiplicity("tauParticles", min=2, max=2),
-                 supy.steps.histos.mass("bParticlesSumP4", 60, 0.0, 300.0),
-                 supy.steps.histos.mass("tauParticlesSumP4", 60, 0.0, 300.0),
-                 supy.steps.filters.mass("bParticlesSumP4", min=85., max=140.),
-                 supy.steps.filters.mass("tauParticlesSumP4", min=85., max=140.),
-                 ]+
+                self.genSelection() +
+                []+
+                #self.particleAcceptancePlots() +
                 self.ggHHPlots() +
                 #self.btag(mask=0x1, p="b") +
                 #self.btag(mask=0x1, p="c") +
@@ -93,6 +127,11 @@ class example(supy.analysis):
                               calculables.Particles(pids=[25], label="h"),
 
                               calculables.Particles(pids=[-15, -5, 5, 15], label="btau"),
+
+                              calculables.Particles(pids=[-5, 5], label="bKine", ptMin=30.0, absEtaMax=2.4),
+                              calculables.Particles(pids=[-15, 15], label="tauKine", ptMin=30.0, absEtaMax=2.4),
+                              calculables.Particles(pids=[-15, -5, 5, 15], label="btauKine", ptMin=30.0, absEtaMax=2.4),
+
                               #calculables.JetMatchedTo(sourceKey="udsParticles"),
                               calculables.JetMatchedTo(sourceKey="cParticles"),
                               calculables.JetMatchedTo(sourceKey="bParticles"),
@@ -123,42 +162,19 @@ class example(supy.analysis):
                 specify(names="tt_1700_2500", weights=w, color=r.kBlack, effectiveLumi=20/fb) +
                 specify(names="tt_2500_100000", weights=w, color=r.kBlack, effectiveLumi=20/fb) +
 
-                specify(names="BB_0_3",   weights=w, color=r.kBlue, nEventsMax=n) +
-                specify(names="BB_3_7",   weights=w, color=r.kBlue, nEventsMax=n) +
-                specify(names="BB_7_13",  weights=w, color=r.kBlue, effectiveLumi=20/fb) +
-                specify(names="BB_13_21", weights=w, color=r.kBlue, effectiveLumi=20/fb) +
-                #specify(names="BB_21_1k", weights=w, color=r.kBlue, effectiveLumi=2/fb) +
+                #specify(names="BB_0_3",   weights=w, color=r.kBlue, nEventsMax=n) +
+                #specify(names="BB_3_7",   weights=w, color=r.kBlue, nEventsMax=n) +
+                #specify(names="BB_7_13",  weights=w, color=r.kBlue, effectiveLumi=20/fb) +
+                #specify(names="BB_13_21", weights=w, color=r.kBlue, effectiveLumi=20/fb) +
+                ##specify(names="BB_21_1k", weights=w, color=r.kBlue, effectiveLumi=2/fb) +
 
                 specify(names="BBB_0_6",   weights=w, color=r.kGreen, nEventsMax=n) +
                 specify(names="BBB_6_13",  weights=w, color=r.kGreen, effectiveLumi=200/fb) +
                 specify(names="BBB_13_1k", weights=w, color=r.kGreen, effectiveLumi=200/fb) +
 
-                specify(names="hh_bbtt",              color=r.kRed, effectiveLumi=200/fb) +
+                specify(names="hh_bbtt",              color=r.kRed, effectiveLumi=20000/fb) +
                 []
                 )
-
-#    def listOfSamples(self, pars):
-#        from supy.samples import specify
-#        w = calculables.GenWeight()
-#        return (specify(names="tt_0_600", weights=w, color=r.kBlack, effectiveLumi=0.1/fb) +
-#                specify(names="tt_600_1100", weights=w, color=r.kBlack, effectiveLumi=1/fb) +
-#                specify(names="tt_1100_1700", weights=w, color=r.kBlack, effectiveLumi=2/fb) +
-#                specify(names="tt_1700_2500", weights=w, color=r.kBlack, effectiveLumi=20/fb) +
-#                specify(names="tt_2500_100000", weights=w, color=r.kBlack, effectiveLumi=20/fb) +
-#
-#                specify(names="BB_0_3",   weights=w, color=r.kBlue, effectiveLumi=0.2/fb) +
-#                specify(names="BB_3_7",   weights=w, color=r.kBlue, effectiveLumi=2/fb) +
-#                specify(names="BB_7_13",  weights=w, color=r.kBlue, effectiveLumi=2/fb) +
-#                specify(names="BB_13_21", weights=w, color=r.kBlue, effectiveLumi=20/fb) +
-#                #specify(names="BB_21_1k", weights=w, color=r.kBlue, effectiveLumi=2/fb) +
-#
-#                specify(names="BBB_0_6",   weights=w, color=r.kGreen, effectiveLumi=20/fb) +
-#                specify(names="BBB_6_13",  weights=w, color=r.kGreen, effectiveLumi=20/fb) +
-#                specify(names="BBB_13_1k", weights=w, color=r.kGreen, effectiveLumi=200/fb) +
-#
-#                specify(names="hh_bbtt",              color=r.kRed, effectiveLumi=200/fb) +
-#                []
-#                )
 
 
     def conclude(self, pars):
@@ -199,4 +215,23 @@ class example(supy.analysis):
                      printImperfectCalcPageIfEmpty=False,
                      printXs=True,
                      blackList=["lumiHisto", "xsHisto", "nJobsHisto"],
+                     rowColors=[r.kBlack, r.kViolet+4],
+                     latexYieldTable=True,
+                     samplesForRatios=("hh_bb#tau#tau", "tt"),
+                     sampleLabelsForRatios=("hh", "tt"),
+                     foms=[{"value": lambda x, y: x/y,
+                            "uncRel": lambda x, y, xUnc, yUnc: math.sqrt((xUnc/x)**2 + (yUnc/y)**2),
+                            "label": lambda x, y:"%s/%s" % (x, y),
+                            },
+                           #{"value": lambda x,y: x/(y**0.5),
+                           # "uncRel": lambda x, y, xUnc, yUnc: math.sqrt((xUnc/x)**2 + (yUnc/y/2.)**2),
+                           # "label": lambda x,y: "%s/sqrt(%s)" % (x, y),
+                           # },
+                           #{"value": lambda x, y: x/(((a*y)**2+y)**0.5),
+                           # "uncRel": lambda x, y, xUnc, yUnc: math.sqrt((xUnc/x)**2 +\
+                           #                                              (yUnc*(2*a*a*y+1)/(a*a*y*y+y)/2.)**2\
+                           #                                              ),
+                           # "label": lambda x,y: "%s/r(%s+%s^2/%3.0f)" % (x, y, y, 1/a/a),
+                           # },
+                           ],
                      ).plotAll()
