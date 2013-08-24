@@ -19,16 +19,16 @@ class example(supy.analysis):
                 supy.steps.histos.multiplicity("tParticles"),
                 supy.steps.histos.multiplicity("hParticles"),
                 supy.steps.histos.multiplicity("bParticles"),
-                supy.steps.histos.multiplicity("cParticles"),
+                #supy.steps.histos.multiplicity("cParticles"),
                 #supy.steps.histos.multiplicity("muParticles"),
                 #supy.steps.histos.multiplicity("eParticles"),
                 supy.steps.histos.multiplicity("tauParticles"),
+                supy.steps.histos.multiplicity("btauParticles"),
                 ]
 
 
     def btag(self, mask=0, p=""):
-        return [#supy.steps.histos.multiplicity("bTaggedJets"),
-                #steps.jetHistogrammer(var="BTag", nBins=5, xMin=-0.5, xMax=4.5)+
+        return [#steps.jetHistogrammer(var="BTag", nBins=5, xMin=-0.5, xMax=4.5)+
                 #supy.steps.histos.multiplicity("JetMatchedTo_%sParticles" % p),
                 steps.matchHistogrammer("JetMatchedTo_%sParticles" % p),
                 steps.matchHistogrammer("JetMatchedTo_%sParticles" % p, maxDR=0.3),
@@ -45,17 +45,35 @@ class example(supy.analysis):
                 ]
 
 
+    def ggHHPlots(self):
+        return [supy.steps.histos.pt("bParticlesSumP4", 50, 0.0, 500.0),
+                supy.steps.histos.pt("tauParticlesSumP4", 50, 0.0, 500.0),
+                supy.steps.histos.eta("bParticlesSumP4", 20, -8.0, 8.0),
+                supy.steps.histos.eta("tauParticlesSumP4", 20, -8.0, 8.0),
+                supy.steps.histos.mass("btauParticlesSumP4", 40, 200.0, 1000.0),
+                supy.steps.histos.Rapidity("btauParticlesSumP4", 20, -4.0, 4.0),
+                ]
+
     def listOfSteps(self, pars):
         return ([supy.steps.printer.progressPrinter()] +
                 self.weightPlots() +
-                #self.genParticlePlots() +
-                self.btag(mask=0x1, p="b") +
-                self.btag(mask=0x1, p="c") +
-                self.btag(mask=0x2, p="b") +
-                self.btag(mask=0x2, p="c") +
+                self.genParticlePlots() +
+                [supy.steps.filters.multiplicity("bParticles", min=2, max=2),
+                 supy.steps.filters.multiplicity("tauParticles", min=2, max=2),
+                 supy.steps.histos.mass("bParticlesSumP4", 60, 0.0, 300.0),
+                 supy.steps.histos.mass("tauParticlesSumP4", 60, 0.0, 300.0),
+                 supy.steps.filters.mass("bParticlesSumP4", min=85., max=140.),
+                 supy.steps.filters.mass("tauParticlesSumP4", min=85., max=140.),
+                 ]+
+                self.ggHHPlots() +
+                #self.btag(mask=0x1, p="b") +
+                #self.btag(mask=0x1, p="c") +
+                #self.btag(mask=0x2, p="b") +
+                #self.btag(mask=0x2, p="c") +
                 #self.btag(mask=bMask, p="uds") +
                 #self.btag("g") +
                 #self.btag("tau") +
+                #supy.steps.histos.multiplicity("bTaggedJets"),
                 [])
 
 
@@ -73,6 +91,8 @@ class example(supy.analysis):
                               calculables.Particles(pids=[-16, -14, -12, 12, 14, 16], label="nu"),
                               calculables.Particles(pids=[21], label="g"),
                               calculables.Particles(pids=[25], label="h"),
+
+                              calculables.Particles(pids=[-15, -5, 5, 15], label="btau"),
                               #calculables.JetMatchedTo(sourceKey="udsParticles"),
                               calculables.JetMatchedTo(sourceKey="cParticles"),
                               calculables.JetMatchedTo(sourceKey="bParticles"),
@@ -80,6 +100,9 @@ class example(supy.analysis):
                               #calculables.JetMatchedTo(sourceKey="gParticles"),
                               calculables.bTaggedJets(),
                               calculables.HT(),
+                              calculables.SumP4("bParticles"),
+                              calculables.SumP4("tauParticles"),
+                              calculables.SumP4("btauParticles"),
                               ]
         return listOfCalculables
 
@@ -91,26 +114,51 @@ class example(supy.analysis):
 
     def listOfSamples(self, pars):
         from supy.samples import specify
+        #w = supy.calculables.other.fixedValue("another", 1.0)
         w = calculables.GenWeight()
-        return (specify(names="tt_0_600", weights=w, color=r.kBlack, effectiveLumi=0.02/fb) +
-                specify(names="tt_600_1100", weights=w, color=r.kBlack, effectiveLumi=0.2/fb) +
-                specify(names="tt_1100_1700", weights=w, color=r.kBlack, effectiveLumi=1/fb) +
-                specify(names="tt_1700_2500", weights=w, color=r.kBlack, effectiveLumi=10/fb) +
-                specify(names="tt_2500_100000", weights=w, color=r.kBlack, effectiveLumi=10/fb) +
+        n = 100000
+        return (specify(names="tt_0_600", weights=w, color=r.kBlack, nEventsMax=n) +
+                specify(names="tt_600_1100", weights=w, color=r.kBlack, nEventsMax=n) +
+                specify(names="tt_1100_1700", weights=w, color=r.kBlack, effectiveLumi=20/fb) +
+                specify(names="tt_1700_2500", weights=w, color=r.kBlack, effectiveLumi=20/fb) +
+                specify(names="tt_2500_100000", weights=w, color=r.kBlack, effectiveLumi=20/fb) +
 
-                specify(names="BB_0_3",   weights=w, color=r.kBlue, effectiveLumi=0.02/fb) +
-                specify(names="BB_3_7",   weights=w, color=r.kBlue, effectiveLumi=0.2/fb) +
-                specify(names="BB_7_13",  weights=w, color=r.kBlue, effectiveLumi=2/fb) +
-                specify(names="BB_13_21", weights=w, color=r.kBlue, effectiveLumi=2/fb) +
+                specify(names="BB_0_3",   weights=w, color=r.kBlue, nEventsMax=n) +
+                specify(names="BB_3_7",   weights=w, color=r.kBlue, nEventsMax=n) +
+                specify(names="BB_7_13",  weights=w, color=r.kBlue, effectiveLumi=20/fb) +
+                specify(names="BB_13_21", weights=w, color=r.kBlue, effectiveLumi=20/fb) +
                 #specify(names="BB_21_1k", weights=w, color=r.kBlue, effectiveLumi=2/fb) +
 
-                specify(names="BBB_0_6",   weights=w, color=r.kGreen, effectiveLumi=20/fb) +
-                specify(names="BBB_6_13",  weights=w, color=r.kGreen, effectiveLumi=20/fb) +
+                specify(names="BBB_0_6",   weights=w, color=r.kGreen, nEventsMax=n) +
+                specify(names="BBB_6_13",  weights=w, color=r.kGreen, effectiveLumi=200/fb) +
                 specify(names="BBB_13_1k", weights=w, color=r.kGreen, effectiveLumi=200/fb) +
 
                 specify(names="hh_bbtt",              color=r.kRed, effectiveLumi=200/fb) +
                 []
                 )
+
+#    def listOfSamples(self, pars):
+#        from supy.samples import specify
+#        w = calculables.GenWeight()
+#        return (specify(names="tt_0_600", weights=w, color=r.kBlack, effectiveLumi=0.1/fb) +
+#                specify(names="tt_600_1100", weights=w, color=r.kBlack, effectiveLumi=1/fb) +
+#                specify(names="tt_1100_1700", weights=w, color=r.kBlack, effectiveLumi=2/fb) +
+#                specify(names="tt_1700_2500", weights=w, color=r.kBlack, effectiveLumi=20/fb) +
+#                specify(names="tt_2500_100000", weights=w, color=r.kBlack, effectiveLumi=20/fb) +
+#
+#                specify(names="BB_0_3",   weights=w, color=r.kBlue, effectiveLumi=0.2/fb) +
+#                specify(names="BB_3_7",   weights=w, color=r.kBlue, effectiveLumi=2/fb) +
+#                specify(names="BB_7_13",  weights=w, color=r.kBlue, effectiveLumi=2/fb) +
+#                specify(names="BB_13_21", weights=w, color=r.kBlue, effectiveLumi=20/fb) +
+#                #specify(names="BB_21_1k", weights=w, color=r.kBlue, effectiveLumi=2/fb) +
+#
+#                specify(names="BBB_0_6",   weights=w, color=r.kGreen, effectiveLumi=20/fb) +
+#                specify(names="BBB_6_13",  weights=w, color=r.kGreen, effectiveLumi=20/fb) +
+#                specify(names="BBB_13_1k", weights=w, color=r.kGreen, effectiveLumi=200/fb) +
+#
+#                specify(names="hh_bbtt",              color=r.kRed, effectiveLumi=200/fb) +
+#                []
+#                )
 
 
     def conclude(self, pars):
@@ -142,7 +190,8 @@ class example(supy.analysis):
         #org.mergeSamples(targetSpec=gopts("tt*1.0", r.kBlack) sources=["tt0_600"])
 
         org.scale(1.0/fb)
-        
+        #org.scale(toPdf=True)
+
         supy.plotter(org,
                      doLog=True,
                      showStatBox=False,
