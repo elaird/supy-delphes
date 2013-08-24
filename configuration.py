@@ -16,3 +16,7 @@ def initializeROOT(r, cppFiles=[]):
 
 def useCachedFileLists():
     return True
+
+
+def LorentzVectorType() :
+    return ('PtEtaPhiM4D','double')
