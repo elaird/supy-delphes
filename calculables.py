@@ -35,17 +35,30 @@ class Particles(supy.wrappedChain.calculable):
     def name(self):
         return "%sParticles" % self.label
 
-    def __init__(self, pids=[], label=""):
+    def __init__(self, pids=[], label="", ptMin=None, absEtaMax=None):
         self.pids = pids
         self.label = label
+        self.ptMin = ptMin
+        self.absEtaMax = absEtaMax
+
+        self.moreName = ""
         if self.pids:
-            self.moreName = "pdgId in %s" % str(list(self.pids))
+            self.moreName += "; pdgId in %s" % str(list(self.pids))
+        if self.ptMin:
+            self.moreName += "; %g < pT" % self.ptMin
+        if self.absEtaMax:
+            self.moreName += "; |eta| < %g" % self.absEtaMax
 
     def update(self, _):
         self.value = []
         for particle in self.source["Particle"]:
-            if particle.PID in self.pids:
-                self.value.append(particle)
+            if self.pids and (particle.PID not in self.pids):
+                continue
+            if self.ptMin and (particle.PT < self.ptMin):
+                continue
+            if self.absEtaMax and (self.absEtaMax < abs(particle.Eta)):
+                continue
+            self.value.append(particle)
 
 
 class bTaggedJets(supy.wrappedChain.calculable):
