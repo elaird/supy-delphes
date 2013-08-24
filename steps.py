@@ -99,3 +99,15 @@ class iterHistogrammer(analysisStep):
                 key += " (%s %d)" % (self.var, i)
                 yTitle = "Events"
             self.book.fill(getattr(object, self.attr), key, *self.bins, title=";%s;%s / bin" % (key, yTitle))
+
+
+class modEntry(analysisStep):
+    def __init__(self, base=None, value=None):
+        for item in ["base", "value"]:
+            a = eval(item)
+            assert a is not None, a
+            setattr(self, item, a)
+        self.moreName = "entry % " + "%d == %d" % (self.base, self.value)
+
+    def select(self, eventVars):
+        return (eventVars["entry"] % self.base) == self.value
