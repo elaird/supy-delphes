@@ -1,5 +1,16 @@
 import math
 
+def size(eventVars={}, key=""):
+    """works, e.g., for
+    (a) TClonesArray with size stored in separate branch;
+    (b) list"""
+
+    pKey = key+"_size"
+    if pKey in eventVars:
+        return eventVars[pKey]
+    else:
+        return len(eventVars[key])
+
 
 def deltaPhi(a, b):
     dphi = a.Phi - b.Phi
