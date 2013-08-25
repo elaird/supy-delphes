@@ -1,3 +1,4 @@
+import utils
 import ROOT as r
 import supy
 
@@ -8,14 +9,22 @@ except ImportError:
     pdgLookupExists = False
 
 class displayer(supy.steps.displayer):
-    def __init__(self, scale=200.0, nMaxJets=7,
-                 jets=[("Jet", r.kBlue, 1),
-                       ("GenJet", r.kBlack, 1),
+    def __init__(self,
+                 scale=200.0,
+                 bTagMask=0x1,
+                 jets=[{"key":"GenJet", "nMax":6, "color":r.kBlack, "width":2, "style":2},
+                       {"key":"Jet", "nMax":10, "color":r.kBlue, "width":1, "style":1},
                        ],
+                 nMaxParticles=12,
+                 particles=[("Particle", r.kBlack),
+                            ("bParticles", r.kRed),
+                            ("tauParticles", r.kCyan),
+                            ],
                  ):
         self.moreName = "(see below)"
 
-        for item in ["scale", "jets", "nMaxJets"]:
+        for item in ["scale", "bTagMask", "jets",
+                     "nMaxParticles", "particles"]:
             setattr(self, item, eval(item))
 
         self.titleSizeFactor = 1.0
@@ -53,24 +62,6 @@ class displayer(supy.steps.displayer):
         event = eventVars["Event"][0]
         self.prepareText(params, coords)
         self.printText("Event %10d / Weight %g" % (event.Number, event.Weight))
-
-    def printVertices(self, eventVars, params, coords, nMax):
-        if "vertexIndices" not in eventVars:
-            return
-        self.prepareText(params, coords)
-        self.printText("Vertices")
-        self.printText("ID   Z(cm)%s"%(" sumPt(GeV)" if not self.prettyMode else ""))
-        self.printText("----------%s"%("-----------" if not self.prettyMode else ""))
-
-        nVertices = eventVars["vertexNdof"].size()
-        for i in range(nVertices) :
-            if nMax<=i :
-                self.printText("[%d more not listed]"%(nVertices-nMax))
-                break
-            
-            out = "%2s  %6.2f"%("G " if i in eventVars["vertexIndices"] else "  ", eventVars["vertexPosition"].at(i).z())
-            if not self.prettyMode : out += " %5.0f"%eventVars["vertexSumPt"].at(i)
-            self.printText(out)
 
     def printPhotons(self, eventVars, params, coords, photons, nMax) :
         self.prepareText(params, coords)
@@ -147,13 +138,18 @@ class displayer(supy.steps.displayer):
         self.printText(headers)
         self.printText("-" * len(headers))
 
-        for iJet, jet in enumerate(eventVars[jets]):
+        nJets = utils.size(eventVars, jets)
+        for iJet in range(nJets):
             if nMax <= iJet:
-                self.printText("[%d more not listed]" % (len(eventVars[jets]) - nMax))
+                self.printText("[%d more not listed]" % (nJets - nMax))
                 break
 
-            outString = "%1s%1s%1s" % (jet.BTag % 0x1, jet.BTag % 0x2, jet.TauTag)
-            outString += " %5.0f %4.1f %4.1f %5.0f" % (jet.PT, jet.Eta, jet.Phi, jet.Mass)
+            jet = eventVars[jets].At(iJet)
+            out = ""
+            out += "2" if jet.BTag & 0x2 else " "
+            out += "1" if jet.BTag & 0x1 else " "
+            out += "t" if jet.TauTag else " "
+            out += " %5.0f %4.1f %4.1f %5.0f" % (jet.PT, jet.Eta, jet.Phi, jet.Mass)
 
             color = r.kBlack
             if highlight:
@@ -163,49 +159,33 @@ class displayer(supy.steps.displayer):
                     if (indicesHighlight in eventVars) and (iJet in eventVars[indicesHighlight]):
                         color = colorHighlight
 
-            self.printText(outString, color)
-
-    def printGenJets(self, eventVars, params, coords, nMax):
-        p4Key = "%sP4%s" % self.genJets
-        if p4Key not in eventVars:
-            return
-        p4Vector = eventVars[p4Key]
-            
-        self.prepareText(params, coords)
-        self.printText(self.renamedDesc(p4Key))
-        self.printText("   pT  eta  phi")
-        self.printText("---------------")
-
-        nJets = p4Vector.size()
-        for iJet in range(nJets):
-            if nMax <= iJet:
-                self.printText("[%d more not listed]"%(nJets-nMax))
-                break
-            jet = p4Vector.at(iJet)
-            self.printText("%5.0f %4.1f %4.1f"%(jet.pt(), jet.eta(), jet.phi()))
+            self.printText(out, color)
 
     def printGenParticles(self, eventVars=None, params=None, coords=None,
-                          nMax=None, indices=None, color=r.kBlack):
+                          nMax=None, particles=None, color=r.kBlack):
         self.prepareText(params, coords)
-        p4s = eventVars["genP4"]
-        ids = eventVars["genPdgId"]
         
-        self.printText(indices.replace("Indices", ""))
-        self.printText("  name  pdgId   pT  eta  phi")
-        self.printText("----------------------------")
+        self.printText(particles)
+        headers = "  name  pdgId   pT  eta  phi st PU"
+        self.printText(headers)
+        self.printText("-" * len(headers))
 
-        nParticles = len(eventVars[indices])
-        iPrint = 0
-        for iParticle in eventVars[indices]:
-            if nMax <= iPrint:
-                self.printText("[%d more not listed]"%(nParticles-nMax))
+        nParticles = utils.size(eventVars, particles)
+        for iParticle in range(nParticles):
+            if nMax <= iParticle:
+                self.printText("[%d more not listed]" % (nParticles - nMax))
                 break
-            pdgId = ids.at(iParticle)
-            p4 = p4s.at(iParticle)
-            name = pdgLookup.pdgid_to_name(pdgId) if pdgLookupExists else ""
-            self.printText("%6s %6d%5.0f %4.1f %4.1f" % (name[-6:], pdgId, p4.pt(), p4.eta(), p4.phi()),
+            particle = eventVars[particles].At(iParticle)
+            name = pdgLookup.pdgid_to_name(particle.PID) if pdgLookupExists else ""
+            self.printText("%6s %6d%5.0f %s %4.1f  %1d  %1d" % (name[-6:],
+                                                                particle.PID,
+                                                                particle.PT,
+                                                                "%4.1f" % particle.Eta if abs(particle.Eta)<10.0 else "    ",
+                                                                particle.Phi,
+                                                                particle.Status,
+                                                                particle.IsPU,
+                                                                ),
                            color=color)
-            iPrint += 1
         return
 
 
@@ -257,7 +237,9 @@ class displayer(supy.steps.displayer):
                lineWidth=1,
                lineStyle=1,
                arrowSize=1.0,
-               circleRadius=1.0):
+               circleRadius=1.0,
+               b=None,
+               tau=None):
 
         c = coords
         x0 = c["x0"]
@@ -279,6 +261,15 @@ class displayer(supy.steps.displayer):
         self.ellipse.SetLineStyle(lineStyle)
         self.ellipse.DrawEllipse(p4.eta(), p4.phi(), circleRadius, circleRadius, 0.0, 360.0, 0.0, "")
 
+        if b:
+            self.ellipse.SetLineColor(r.kRed)
+            self.ellipse.SetLineStyle(3)
+            self.ellipse.DrawEllipse(p4.eta(), p4.phi(), circleRadius, circleRadius, 0.0, 360.0, 0.0, "")
+
+        if tau:
+            self.ellipse.SetLineColor(r.kCyan)
+            self.ellipse.SetLineStyle(2)
+            self.ellipse.DrawEllipse(p4.eta(), p4.phi(), circleRadius, circleRadius, 0.0, 360.0, 0.0, "")
 
     def legendFunc(self, lineColor=None, lineStyle=1, name="", desc=""):
         if name not in self.legendDict:
@@ -323,6 +314,8 @@ class displayer(supy.steps.displayer):
                         etaPhiPad=etaPhiPad,
                         coords=coords,
                         p4=supy.utils.LorentzV(jet.PT, jet.Eta, jet.Phi, jet.Mass),
+                        b=hasattr(jet, "BTag") and jet.BTag & self.bTagMask,
+                        tau=hasattr(jet, "TauTag") and jet.TauTag,
                         lineColor=lineColor,
                         lineWidth=lineWidth,
                         lineStyle=lineStyle,
@@ -385,28 +378,25 @@ class displayer(supy.steps.displayer):
         #    self.drawGenMet(eventVars, rhoPhiCoords, r.kMagenta, defWidth, defArrowSize*2/6.0)
 
         arrowSize = defArrowSize
-        #if not eventVars["isRealData"]:
-        #    for indices, color, nMaxPrint in self.genParticleIndices:
-        #        rhoPhiPad.cd()
-        #        self.drawGenParticles(eventVars=eventVars,
-        #                              indices=indices,
-        #                              coords=rhoPhiCoords,
-        #                              lineColor=color,
-        #                              arrowSize=arrowSize)
-        #        arrowSize *= 0.8
-        #
-        #        etaPhiPad.cd()
-        #        self.drawGenParticles(eventVars=eventVars,
-        #                              indices=indices,
-        #                              lineColor=color,
-        #                              circleRadius=0.15)
-        #
-        for jets, color, style in self.jets:
+        for particles, color in self.particles[1:]:
             self.drawJets(eventVars=eventVars,
-                          jets=jets,
+                          jets=particles,
                           coords=rhoPhiCoords,
                           lineColor=color,
-                          lineStyle=style,
+                          arrowSize=arrowSize,
+                          circleRadius=0.15,
+                          rhoPhiPad=rhoPhiPad,
+                          etaPhiPad=etaPhiPad,
+                          )
+            arrowSize *= 0.8
+
+        for d in self.jets:
+            self.drawJets(eventVars=eventVars,
+                          jets=d["key"],
+                          coords=rhoPhiCoords,
+                          lineColor=d["color"],
+                          lineWidth=d["width"],
+                          lineStyle=d["style"],
                           arrowSize=arrowSize,
                           circleRadius=0.5,
                           rhoPhiPad=rhoPhiPad,
@@ -472,44 +462,28 @@ class displayer(supy.steps.displayer):
         x1 = 0.51
         self.printEvent(eventVars, params=defaults, coords={"x": x0, "y": yy})
 
-        for iCollection, jetSpec in enumerate(self.jets):
+        y = yy - 2*s
+        for d in self.jets:
             self.printJets(eventVars,
                            params=smaller,
-                           coords={"x": x0, "y": yy-2*s-iCollection*s*(6 + self.nMaxJets)},
-                           jets=jetSpec[0],
-                           nMax=self.nMaxJets,
+                           coords={"x": x0, "y": y},
+                           jets=d["key"],
+                           nMax=d["nMax"],
                            highlight=False)
+            y -= s*(5 + d["nMax"])
 
-        #nYR = 6 + self.nMaxJets
-        #nYL = nYR + 4 + nMaxGenJets
-        #for iCollection, particles in enumerate(self.particles):
-        #    left = iCollection % 2
-        #    if left:
-        #        dx = -0.01
-        #        nY = nYL
-        #    else:
-        #        dx = 0.49
-        #        nY = nYR
-        #    self.printGenParticles(eventVars,
-        #                           params=smaller,
-        #                           indices=indices,
-        #                           color=color,
-        #                           coords={"x": x0+dx,
-        #                                   "y": yy-nY*s},
-        #                           nMax=nMax)
-        #    if left:
-        #        nYL += 4+nMax
-        #    else:
-        #        nYR += 4+nMax
+        nLines = 5 + self.nMaxParticles
+        for (particles, color) in self.particles[:1]:
+            self.printGenParticles(eventVars,
+                                   params=smaller,
+                                   particles=particles,
+                                   color=color,
+                                   coords={"x": x0, "y": y},
+                                   nMax=self.nMaxParticles)
 
-        #    if self.jetsOtherAlgo:
-        #        self.printJets(eventVars,
-        #                       params=smaller,
-        #                       coords={"x": x0,
-        #                               "y": yy-(6+self.nMaxJets)*s},
-        #                       jets=self.jetsOtherAlgo,
-        #                       nMax=self.nMaxJets)
-        #
+            y -= s*nLines
+
+
         #    if self.muons:
         #        self.printMuons(eventVars,
         #                        params=defaults,
@@ -517,12 +491,6 @@ class displayer(supy.steps.displayer):
         #                                "y": yy-35*s},
         #                        muons=self.muons,
         #                        nMax=3)
-        #    self.printVertices(eventVars,
-        #                       params=defaults,
-        #                       coords={"x": x1,
-        #                               "y": yy-35*s},
-        #                       nMax=3)
-        #
         #    if self.photons:
         #        self.printPhotons(eventVars,
         #                          params=defaults,
