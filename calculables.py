@@ -30,16 +30,14 @@ class SumP4(supy.wrappedChain.calculable):
             self.value += self.vec
 
 
-class Particles(supy.wrappedChain.calculable):
+class Filtered(supy.wrappedChain.calculable):
     @property
     def name(self):
-        return "%sParticles" % self.label
+        return "%s%ss" % (self.label, self.key)
 
-    def __init__(self, pids=[], label="", ptMin=None, absEtaMax=None):
-        self.pids = pids
-        self.label = label
-        self.ptMin = ptMin
-        self.absEtaMax = absEtaMax
+    def __init__(self, pids=[], label="", ptMin=None, absEtaMax=None, key="Particle", ptSort=False):
+        for item in ["pids", "label", "ptMin", "absEtaMax", "key", "ptSort"]:
+            setattr(self, item, eval(item))
 
         self.moreName = ""
         if self.pids:
@@ -51,7 +49,7 @@ class Particles(supy.wrappedChain.calculable):
 
     def update(self, _):
         self.value = []
-        for particle in self.source["Particle"]:
+        for particle in self.source[self.key]:
             if self.pids and (particle.PID not in self.pids):
                 continue
             if self.ptMin and (particle.PT < self.ptMin):
@@ -59,6 +57,8 @@ class Particles(supy.wrappedChain.calculable):
             if self.absEtaMax and (self.absEtaMax < abs(particle.Eta)):
                 continue
             self.value.append(particle)
+        if self.ptSort:
+            self.value.sort(key=lambda x:x.PT, reverse=True)
 
 
 class bTaggedJets(supy.wrappedChain.calculable):
