@@ -22,12 +22,16 @@ class displayer(supy.steps.displayer):
                             ],
                  nMaxTracks=5,
                  tracks=[],
+                 nMaxLeptons=5,
+                 leptons=["Muon", "Electron", "Photon"],
                  ):
         self.moreName = "(see below)"
 
         for item in ["scale", "bTagMask", "jets",
                      "nMaxParticles", "particles",
-                     "nMaxTracks", "tracks"]:
+                     "nMaxTracks", "tracks",
+                     "nMaxLeptons", "leptons",
+                     ]:
             setattr(self, item, eval(item))
 
         self.titleSizeFactor = 1.0
@@ -60,11 +64,16 @@ class displayer(supy.steps.displayer):
         self.text.SetTextColor(r.kBlack)
 
     def printEvent(self, eventVars, params, coords):
-        if "Event" not in eventVars:
-            return
-        event = eventVars["Event"][0]
-        self.prepareText(params, coords)
-        self.printText("Event %10d / Weight %g" % (event.Number, event.Weight))
+        m = ""
+        if "Event" in eventVars:
+            event = eventVars["Event"][0]
+            m += "Event %10d / Weight %4.1f" % (event.Number, event.Weight)
+        if "rho" in eventVars:
+            m += " / rho %5.1f" % eventVars["rho"]
+
+        if m:
+            self.prepareText(params, coords)
+            self.printText(m)
 
     def printPhotons(self, eventVars, params, coords, photons, nMax) :
         self.prepareText(params, coords)
@@ -183,7 +192,7 @@ class displayer(supy.steps.displayer):
             self.printText("%6s %6d%5.0f %s %4.1f  %1d  %1d" % (name[-6:],
                                                                 particle.PID,
                                                                 particle.PT,
-                                                                "%4.1f" % particle.Eta if abs(particle.Eta)<10.0 else "    ",
+                                                                utils.eta(particle),
                                                                 particle.Phi,
                                                                 particle.Status,
                                                                 particle.IsPU,
@@ -212,9 +221,34 @@ class displayer(supy.steps.displayer):
             self.printText("%6s %6d%5.0f %s %4.1f" % (name[-6:],
                                                       track.PID,
                                                       track.PT,
-                                                      "%4.1f" % track.Eta if abs(track.Eta)<10.0 else "    ",
+                                                      utils.eta(track),
                                                       track.Phi,
                                                       ),
+                           color=color)
+        return
+
+
+    def printLeptons(self, eventVars=None, params=None, coords=None,
+                     nMax=None, leptons=None, color=r.kBlack, ptMin=None):
+        self.prepareText(params, coords)
+
+        self.printText(leptons)
+        headers = "   pT  eta  phi  iso"
+        self.printText(headers)
+        self.printText("-" * len(headers))
+
+        nLeptons = utils.size(eventVars, leptons)
+        for iLepton in range(nLeptons):
+            if nMax <= iLepton:
+                self.printText("[%d more not listed]" % (nLeptons - nMax))
+                break
+
+            lepton = eventVars[leptons][iLepton]
+            self.printText("%5.0f %s %4.1f %4.1f" % (lepton.PT,
+                                                     utils.eta(lepton),
+                                                     lepton.Phi,
+                                                     lepton.IsolationVar,
+                                                     ),
                            color=color)
         return
 
@@ -486,7 +520,7 @@ class displayer(supy.steps.displayer):
         smaller = {}
         smaller.update(defaults)
         smaller["size"] = 0.034
-        
+
         yy = 0.98
         x0 = 0.01
         x1 = 0.51
@@ -502,7 +536,6 @@ class displayer(supy.steps.displayer):
                            highlight=False)
             y -= s*(5 + d["nMax"])
 
-        nLines = 5 + self.nMaxParticles
         for (particles, color) in self.particles[:1]:
             self.printGenParticles(eventVars,
                                    params=smaller,
@@ -510,7 +543,7 @@ class displayer(supy.steps.displayer):
                                    color=color,
                                    coords={"x": x0, "y": y},
                                    nMax=self.nMaxParticles)
-            y -= s*nLines
+            y -= s*(5 + self.nMaxParticles)
 
         for key in self.tracks:
             self.printTracks(eventVars,
@@ -518,29 +551,17 @@ class displayer(supy.steps.displayer):
                              tracks=key,
                              coords={"x": x0, "y": y},
                              nMax=self.nMaxTracks)
-        y -= s*(5 + self.nMaxTracks)
+            y -= s*(5 + self.nMaxTracks)
 
-        #    if self.muons:
-        #        self.printMuons(eventVars,
-        #                        params=defaults,
-        #                        coords={"x": x0,
-        #                                "y": yy-35*s},
-        #                        muons=self.muons,
-        #                        nMax=3)
-        #    if self.photons:
-        #        self.printPhotons(eventVars,
-        #                          params=defaults,
-        #                          coords={"x": x0,
-        #                                  "y": yy-42*s},
-        #                          photons=self.photons,
-        #                          nMax=3)
-        #    if self.electrons:
-        #        self.printElectrons(eventVars,
-        #                            params=defaults,
-        #                            coords={"x": x1,
-        #                                    "y": yy-42*s},
-        #                            electrons=self.electrons,
-        #                            nMax=3)
+        y = 0.98 - 2*s
+        x0 = 0.53
+        for key in self.leptons:
+            self.printLeptons(eventVars,
+                             params=smaller,
+                             leptons=key,
+                             coords={"x": x0, "y": y},
+                             nMax=self.nMaxLeptons)
+            y -= s*(5 + self.nMaxLeptons)
 
         self.canvas.cd()
         pad.Draw()
