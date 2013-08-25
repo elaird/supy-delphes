@@ -12,6 +12,10 @@ def size(eventVars={}, key=""):
         return len(eventVars[key])
 
 
+def eta(obj):
+    return "%4.1f" % obj.Eta if abs(obj.Eta)<10.0 else "    "
+
+
 def deltaPhi(a, b):
     dphi = a.Phi - b.Phi
     if dphi > math.pi:
