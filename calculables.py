@@ -12,6 +12,11 @@ class HT(supy.wrappedChain.calculable):
         self.value = self.source["ScalarHT"][0].HT
 
 
+class rho(supy.wrappedChain.calculable):
+    def update(self, _):
+        self.value = self.source["Rho"][0].HT
+
+
 class SumP4(supy.wrappedChain.calculable):
     @property
     def name(self):
