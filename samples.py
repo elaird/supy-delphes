@@ -12,12 +12,17 @@ conf0s = "root://eoscms.cern.ch//eos/cms/store/group/phys_higgs/upgrade/PhaseI/C
 conf0.add("tt.conf0_0_600", '[%s/tt-4p-0-600-v1510_14TEV/tt-4p-0-600-v1510_14TEV_354724341_PhaseI_Conf0_140PileUp.root"]' % conf0s,
           xs=500*pb)
 
-# conf 3
+eos = supy.sites.eos()
+def l(dir="", skip=[], configuration=None):
+    assert configuration is not None
+    out = eos+"/eos/cms/store/group/phys_higgs/upgrade"
+    if configuration == 3:
+        out += "/PhaseII/Configuration3/140PileUp/"
+    return out+'%s/", itemsToSkip=%s)' % (dir, str(skip))
+
+
 def c3(dir="", skip=[]):
-    stem = "root://eoscms.cern.ch//eos/cms/store/group/phys_higgs/upgrade/PhaseII/Configuration3/140PileUp/"
-    eos = "/afs/cern.ch/project/eos/installation/0.2.31/bin/eos.select"
-    func = "utils.io.fileListFromEos"
-    return '%s("%s", eos="%s", itemsToSkip=%s)' % (func, stem+dir+"/", eos, str(skip))
+    return l(dir=dir, skip=skip, configuration=3)
 
 
 conf3 = supy.samples.SampleHolder()
