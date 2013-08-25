@@ -108,6 +108,7 @@ class example(supy.analysis):
                 #self.btag("g") +
                 #self.btag("tau") +
                 #supy.steps.histos.multiplicity("bTaggedJets"),
+                #[steps.displayer(tracks=["10GeVTracks"])] +
                 [])
 
 
@@ -115,22 +116,21 @@ class example(supy.analysis):
         listOfCalculables = supy.calculables.zeroArgs(supy.calculables)
         listOfCalculables += supy.calculables.zeroArgs(calculables)
         listOfCalculables += [supy.calculables.other.fixedValue("one", 1.0),
-                              calculables.Particles(pids=[-3, -2, -1, 1, 2, 3], label="uds"),
-                              calculables.Particles(pids=[-4, 4], label="c"),
-                              calculables.Particles(pids=[-5, 5], label="b"),
-                              calculables.Particles(pids=[-6, 6], label="t"),
-                              calculables.Particles(pids=[-11, 11], label="e"),
-                              calculables.Particles(pids=[-13, 13], label="mu"),
-                              calculables.Particles(pids=[-15, 15], label="tau"),
-                              calculables.Particles(pids=[-16, -14, -12, 12, 14, 16], label="nu"),
-                              calculables.Particles(pids=[21], label="g"),
-                              calculables.Particles(pids=[25], label="h"),
-
-                              calculables.Particles(pids=[-15, -5, 5, 15], label="btau"),
-
-                              calculables.Particles(pids=[-5, 5], label="bKine", ptMin=30.0, absEtaMax=2.4),
-                              calculables.Particles(pids=[-15, 15], label="tauKine", ptMin=30.0, absEtaMax=2.4),
-                              calculables.Particles(pids=[-15, -5, 5, 15], label="btauKine", ptMin=30.0, absEtaMax=2.4),
+                              calculables.Filtered(pids=[-3, -2, -1, 1, 2, 3], label="uds"),
+                              calculables.Filtered(pids=[-4, 4], label="c"),
+                              calculables.Filtered(pids=[-5, 5], label="b"),
+                              calculables.Filtered(pids=[-6, 6], label="t"),
+                              calculables.Filtered(pids=[-11, 11], label="e"),
+                              calculables.Filtered(pids=[-13, 13], label="mu"),
+                              calculables.Filtered(pids=[-15, 15], label="tau"),
+                              calculables.Filtered(pids=[-16, -14, -12, 12, 14, 16], label="nu"),
+                              calculables.Filtered(pids=[21], label="g"),
+                              calculables.Filtered(pids=[25], label="h"),
+                              calculables.Filtered(pids=[-15, -5, 5, 15], label="btau"),
+                              calculables.Filtered(pids=[-5, 5], label="bKine", ptMin=30.0, absEtaMax=2.4),
+                              calculables.Filtered(pids=[-15, 15], label="tauKine", ptMin=30.0, absEtaMax=2.4),
+                              calculables.Filtered(pids=[-15, -5, 5, 15], label="btauKine", ptMin=30.0, absEtaMax=2.4),
+                              calculables.Filtered(label="10GeV", ptMin=10.0, key="Track", ptSort=True),
 
                               #calculables.JetMatchedTo(sourceKey="udsParticles"),
                               calculables.JetMatchedTo(sourceKey="cParticles"),
@@ -139,6 +139,7 @@ class example(supy.analysis):
                               #calculables.JetMatchedTo(sourceKey="gParticles"),
                               calculables.bTaggedJets(),
                               calculables.HT(),
+                              calculables.rho(),
                               calculables.SumP4("bParticles"),
                               calculables.SumP4("tauParticles"),
                               calculables.SumP4("btauParticles"),
@@ -172,7 +173,7 @@ class example(supy.analysis):
                 specify(names="BBB_6_13",  weights=w, color=r.kGreen, effectiveLumi=200/fb) +
                 specify(names="BBB_13_1k", weights=w, color=r.kGreen, effectiveLumi=200/fb) +
 
-                specify(names="hh_bbtt",              color=r.kRed, effectiveLumi=20000/fb) +
+                specify(names="hh_bbtt", color=r.kRed, effectiveLumi=20000/fb) +
                 []
                 )
 
@@ -209,14 +210,15 @@ class example(supy.analysis):
         #org.scale(toPdf=True)
 
         supy.plotter(org,
-                     doLog=True,
                      showStatBox=False,
                      pdfFileName=self.pdfFileName(org.tag),
                      printImperfectCalcPageIfEmpty=False,
                      printXs=True,
                      blackList=["lumiHisto", "xsHisto", "nJobsHisto"],
                      rowColors=[r.kBlack, r.kViolet+4],
-                     latexYieldTable=True,
+
+                     doLog=False,
+                     latexYieldTable=False,
                      samplesForRatios=("hh_bb#tau#tau", "tt"),
                      sampleLabelsForRatios=("hh", "tt"),
                      foms=[{"value": lambda x, y: x/y,
