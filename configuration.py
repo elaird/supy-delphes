@@ -18,5 +18,9 @@ def useCachedFileLists():
     return True
 
 
-def LorentzVectorType() :
-    return ('PtEtaPhiM4D','double')
+def LorentzVectorType():
+    return ('PtEtaPhiM4D', 'double')
+
+
+def experiment():
+    return "cms"
