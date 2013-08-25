@@ -20,11 +20,14 @@ class displayer(supy.steps.displayer):
                             ("bParticles", r.kRed),
                             ("tauParticles", r.kCyan),
                             ],
+                 nMaxTracks=5,
+                 tracks=[],
                  ):
         self.moreName = "(see below)"
 
         for item in ["scale", "bTagMask", "jets",
-                     "nMaxParticles", "particles"]:
+                     "nMaxParticles", "particles",
+                     "nMaxTracks", "tracks"]:
             setattr(self, item, eval(item))
 
         self.titleSizeFactor = 1.0
@@ -185,6 +188,33 @@ class displayer(supy.steps.displayer):
                                                                 particle.Status,
                                                                 particle.IsPU,
                                                                 ),
+                           color=color)
+        return
+
+
+    def printTracks(self, eventVars=None, params=None, coords=None,
+                    nMax=None, tracks=None, color=r.kBlack, ptMin=None):
+        self.prepareText(params, coords)
+
+        self.printText(tracks)
+        headers = "  name  pdgId   pT  eta  phi"
+        self.printText(headers)
+        self.printText("-" * len(headers))
+
+        nTracks = utils.size(eventVars, tracks)
+        for iTrack in range(nTracks):
+            if nMax <= iTrack:
+                self.printText("[%d more not listed]" % (nTracks - nMax))
+                break
+
+            track = eventVars[tracks][iTrack]
+            name = pdgLookup.pdgid_to_name(track.PID) if pdgLookupExists else ""
+            self.printText("%6s %6d%5.0f %s %4.1f" % (name[-6:],
+                                                      track.PID,
+                                                      track.PT,
+                                                      "%4.1f" % track.Eta if abs(track.Eta)<10.0 else "    ",
+                                                      track.Phi,
+                                                      ),
                            color=color)
         return
 
@@ -480,9 +510,15 @@ class displayer(supy.steps.displayer):
                                    color=color,
                                    coords={"x": x0, "y": y},
                                    nMax=self.nMaxParticles)
-
             y -= s*nLines
 
+        for key in self.tracks:
+            self.printTracks(eventVars,
+                             params=smaller,
+                             tracks=key,
+                             coords={"x": x0, "y": y},
+                             nMax=self.nMaxTracks)
+        y -= s*(5 + self.nMaxTracks)
 
         #    if self.muons:
         #        self.printMuons(eventVars,
