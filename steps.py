@@ -18,11 +18,12 @@ class matchHistogrammer(analysisStep):
 
     def uponAcceptance(self, eventVars):
         for particle, jet in eventVars[self.sourceKey].iteritems():
-            dr = utils.deltaR(particle, jet)
+            dr = utils.deltaR(particle, jet) if jet else 999.9
             if self.maxDR and (self.maxDR < dr):
                 continue
+            jetPT = jet.PT if jet else 0.0
             self.book.fill(dr, "DeltaR", 50, 0.0, 5.0, title=";#DeltaR"+self.title)
-            self.book.fill(jet.PT/particle.PT, "ptRatio", 50, 0.0, 2.0,  title=";jet pT / particle pT"+self.title)
+            self.book.fill(jetPT/particle.PT, "ptRatio", 50, 0.0, 2.0,  title=";jet pT / particle pT"+self.title)
 
 
 class efficiencyHistogrammer(analysisStep):
@@ -60,7 +61,8 @@ class efficiencyHistogrammer(analysisStep):
 
     def uponAcceptance(self, eventVars):
         for particle, jet in eventVars[self.sourceKey].iteritems():
-            if self.maxDR and self.maxDR < utils.deltaR(particle, jet):
+            dr = utils.deltaR(particle, jet) if jet else 999.9
+            if self.maxDR and self.maxDR < dr:
                 continue
             if self.minPt and particle.PT < self.minPt:
                 continue
@@ -68,7 +70,7 @@ class efficiencyHistogrammer(analysisStep):
                 continue
             x = getattr(particle, self.particleVar)
             self.book.fill(x, self.tagTitle[0], *self.binsMinMax, title=self.tagTitle[1])
-            if self.passFunc(particle, jet):#getattr(jet, self.jetFlag) & self.mask:
+            if jet and self.passFunc(particle, jet):
                 self.book.fill(x, self.probeTitle[0], *self.binsMinMax,  title=self.probeTitle[1])
 
 
