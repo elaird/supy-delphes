@@ -15,7 +15,13 @@ def initializeROOT(r, cppFiles=[]):
 
 
 def useCachedFileLists():
-    return True
+    return False
+
+
+def detectorConfig():
+    #return "/PhaseI/Configuration0/NoPileUp/"
+    #return "/PhaseI/Configuration0/140PileUp/"
+    return "/PhaseII/Configuration3/140PileUp/"
 
 
 def LorentzVectorType():
