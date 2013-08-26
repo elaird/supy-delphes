@@ -40,8 +40,8 @@ class Filtered(supy.wrappedChain.calculable):
     def name(self):
         return "%s%ss" % (self.label, self.key)
 
-    def __init__(self, pids=[], label="", ptMin=None, absEtaMax=None, key="Particle", ptSort=False):
-        for item in ["pids", "label", "ptMin", "absEtaMax", "key", "ptSort"]:
+    def __init__(self, pids=[], label="", ptMin=None, absEtaMax=None, key="Particle", ptSort=False, pt="PT"):
+        for item in ["pids", "label", "ptMin", "absEtaMax", "key", "ptSort", "pt"]:
             setattr(self, item, eval(item))
 
         self.moreName = ""
@@ -57,13 +57,13 @@ class Filtered(supy.wrappedChain.calculable):
         for particle in self.source[self.key]:
             if self.pids and (particle.PID not in self.pids):
                 continue
-            if self.ptMin and (particle.PT < self.ptMin):
+            if self.ptMin and (getattr(particle, self.pt) < self.ptMin):
                 continue
             if self.absEtaMax and (self.absEtaMax < abs(particle.Eta)):
                 continue
             self.value.append(particle)
         if self.ptSort:
-            self.value.sort(key=lambda x:x.PT, reverse=True)
+            self.value.sort(key=lambda x:getattr(x, self.pt), reverse=True)
 
 
 class bTaggedJets(supy.wrappedChain.calculable):
