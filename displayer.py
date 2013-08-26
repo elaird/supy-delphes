@@ -15,15 +15,17 @@ class displayer(supy.steps.displayer):
                  jets=[{"key":"GenJet", "nMax":6, "color":r.kBlack, "width":2, "style":2},
                        {"key":"Jet", "nMax":10, "color":r.kBlue, "width":1, "style":1},
                        ],
-                 nMaxParticles=12,
+                 nMaxParticles=20,
                  particles=[("Particle", r.kBlack),
                             ("bParticles", r.kRed),
                             ("tauParticles", r.kCyan),
                             ],
-                 nMaxTracks=5,
+                 nMaxTracks=6,
                  tracks=[],
                  nMaxLeptons=5,
                  leptons=["Muon", "Electron", "Photon"],
+                 nMaxTowers=10,
+                 towers=[],
                  ):
         self.moreName = "(see below)"
 
@@ -31,6 +33,7 @@ class displayer(supy.steps.displayer):
                      "nMaxParticles", "particles",
                      "nMaxTracks", "tracks",
                      "nMaxLeptons", "leptons",
+                     "nMaxTowers", "towers",
                      ]:
             setattr(self, item, eval(item))
 
@@ -64,16 +67,32 @@ class displayer(supy.steps.displayer):
         self.text.SetTextColor(r.kBlack)
 
     def printEvent(self, eventVars, params, coords):
-        m = ""
+        self.prepareText(params, coords)
+
         if "Event" in eventVars:
             event = eventVars["Event"][0]
-            m += "Event %10d / Weight %4.1f" % (event.Number, event.Weight)
-        if "rho" in eventVars:
-            m += " / rho %5.1f" % eventVars["rho"]
+            self.printText("Event %10d" % event.Number)
+            self.printText("Weight %9.2f" % event.Weight)
+        else:
+            self.printText("")
+            self.printText("")
 
-        if m:
-            self.prepareText(params, coords)
-            self.printText(m)
+        if "rho" in eventVars:
+            self.printText("rho   %10.1f" % eventVars["rho"])
+        else:
+            self.printText("")
+
+        if "HT" in eventVars:
+            self.printText("HT    %10.1f" % eventVars["HT"])
+        else:
+            self.printText("")
+
+        if "MissingET" in eventVars:
+            met = eventVars["MissingET"][0]
+            self.printText("MET   %10.1f (phi %4.1f)" % (met.MET, met.Phi))
+        else:
+            self.printText("")
+
 
     def printPhotons(self, eventVars, params, coords, photons, nMax) :
         self.prepareText(params, coords)
@@ -202,7 +221,7 @@ class displayer(supy.steps.displayer):
 
 
     def printTracks(self, eventVars=None, params=None, coords=None,
-                    nMax=None, tracks=None, color=r.kBlack, ptMin=None):
+                    nMax=None, tracks=None, color=r.kBlack):
         self.prepareText(params, coords)
 
         self.printText(tracks)
@@ -224,6 +243,30 @@ class displayer(supy.steps.displayer):
                                                       utils.eta(track),
                                                       track.Phi,
                                                       ),
+                           color=color)
+        return
+
+
+    def printTowers(self, eventVars=None, params=None, coords=None,
+                    nMax=None, towers=None, color=r.kBlack):
+        self.prepareText(params, coords)
+
+        self.printText(towers)
+        headers = "   ET  eta  phi"
+        self.printText(headers)
+        self.printText("-" * len(headers))
+
+        nTowers = utils.size(eventVars, towers)
+        for iTower in range(nTowers):
+            if nMax <= iTower:
+                self.printText("[%d more not listed]" % (nTowers - nMax))
+                break
+
+            tower = eventVars[towers][iTower]
+            self.printText("%5.0f %s %4.1f" % (tower.ET,
+                                               utils.eta(tower),
+                                               tower.Phi,
+                                               ),
                            color=color)
         return
 
@@ -504,7 +547,7 @@ class displayer(supy.steps.displayer):
         pad.Draw()
         return [pad,legend]
 
-    def printAllText(self, eventVars, corners):
+    def printText1(self, eventVars, corners):
         pad = r.TPad("textPad", "textPad",
                      corners["x1"], corners["y1"],
                      corners["x2"], corners["y2"])
@@ -526,7 +569,7 @@ class displayer(supy.steps.displayer):
         x1 = 0.51
         self.printEvent(eventVars, params=defaults, coords={"x": x0, "y": yy})
 
-        y = yy - 2*s
+        y = yy - 7*s
         for d in self.jets:
             self.printJets(eventVars,
                            params=smaller,
@@ -545,6 +588,8 @@ class displayer(supy.steps.displayer):
                                    nMax=self.nMaxParticles)
             y -= s*(5 + self.nMaxParticles)
 
+        y = yy - 7*s
+        x0 = 0.49
         for key in self.tracks:
             self.printTracks(eventVars,
                              params=smaller,
@@ -553,14 +598,42 @@ class displayer(supy.steps.displayer):
                              nMax=self.nMaxTracks)
             y -= s*(5 + self.nMaxTracks)
 
+        x0 = 0.72
+        for key in self.towers:
+            self.printTowers(eventVars,
+                             params=smaller,
+                             towers=key,
+                             coords={"x": x0, "y": y},
+                             nMax=self.nMaxTowers)
+            y -= s*(5 + self.nMaxTowers)
+
+        self.canvas.cd()
+        pad.Draw()
+        return [pad]
+
+
+    def printText2(self, eventVars, corners):
+        pad = r.TPad("textPad2", "textPad2",
+                     corners["x1"], corners["y1"],
+                     corners["x2"], corners["y2"])
+        pad.cd()
+
+        defaults = {}
+        defaults["size"] = 0.08
+        defaults["font"] = 80
+        defaults["color"] = r.kBlack
+        defaults["slope"] = 0.03
+        s = defaults["slope"]
+
         y = 0.98 - 2*s
-        x0 = 0.53
+        x0 = 0.01
+
         for key in self.leptons:
             self.printLeptons(eventVars,
-                             params=smaller,
-                             leptons=key,
-                             coords={"x": x0, "y": y},
-                             nMax=self.nMaxLeptons)
+                              params=defaults,
+                              leptons=key,
+                              coords={"x": x0, "y": y},
+                              nMax=self.nMaxLeptons)
             y -= s*(5 + self.nMaxLeptons)
 
         self.canvas.cd()
@@ -591,10 +664,15 @@ class displayer(supy.steps.displayer):
                          "x2":1.0-rhoPhiPadYSize,
                          "y2":1.0}
 
-        textCorners =  {"x1":rhoPhiPadXSize + 0.11,
+        textCorners1 =  {"x1":rhoPhiPadXSize + 0.11,
+                         "y1":0.0,
+                         "x2":1.0,
+                         "y2":1.0}
+
+        textCorners2 = {"x1":rhoPhiPadXSize - 0.08,
                         "y1":0.0,
-                        "x2":1.0,
-                        "y2":1.0}
+                        "x2":rhoPhiPadXSize + 0.11,
+                        "y2":0.55}
 
         rhoPhiPad = self.rhoPhiPad(eventVars, rhoPhiCoords, rhoPhiCorners)
         etaPhiPad, etaPhiPlot = self.etaPhiPad(eventVars, etaPhiCorners)
@@ -607,5 +685,6 @@ class displayer(supy.steps.displayer):
         etaPhiPad.Draw()
 
         keep.append(self.drawLegend(corners=legendCorners))
-        keep.append(self.printAllText(eventVars, corners=textCorners))
+        keep.append(self.printText1(eventVars, corners=textCorners1))
+        keep.append(self.printText2(eventVars, corners=textCorners2))
         return keep
