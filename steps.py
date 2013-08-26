@@ -26,21 +26,23 @@ class matchHistogrammer(analysisStep):
 
 
 class efficiencyHistogrammer(analysisStep):
-    def __init__(self, sourceKey="", particleVar="", jetFlag="", mask=0,
+    def __init__(self, sourceKey="", particleVar="",
                  maxDR=None, minPt=None, maxAbsEta=None, binsMinMax=None):
-        for item in ["sourceKey", "particleVar", "jetFlag", "mask",
+        for item in ["sourceKey", "particleVar",
                      "maxDR", "minPt", "maxAbsEta", "binsMinMax"]:
             setattr(self, item, eval(item))
 
-        stem = "_".join([sourceKey, self.particleVar, self.jetFlag, hex(self.mask)])
-        self.tagTitle = ("tag_"+stem, ";particle %s (%s);matches / bin" % (self.particleVar, self.sourceKey))
-        self.probeTitle = ("probe_"+stem, self.tagTitle[1].replace(")", " with %s)" % self.jetFlag))
-        self.effTitle = ("efficiency_"+stem, ";particle %s (%s);%s&%s  efficiency" % (self.particleVar,
-                                                                                      self.sourceKey,
-                                                                                      self.jetFlag,
-                                                                                      hex(self.mask)))
+        stem = "_".join([sourceKey, self.particleVar])#, self.jetFlag, hex(self.mask)])
+        self.tagTitle = ("tag_"+stem, ";particle %s (%s, all);matches / bin" % (self.particleVar, self.sourceKey))
+        self.probeTitle = ("probe_"+stem,
+                           self.tagTitle[1].replace("all)", "passing %s)" % self.name.replace("EfficiencyHistogrammer", "")))
+        self.effTitle = ("efficiency_"+stem,
+                         ";particle %s (%s);%s" % (self.particleVar,
+                                                   self.sourceKey,
+                                                   self.name.replace("Histogrammer", ""),
+                                                   ))
 
-        self.moreName = "%s&%s eff. by %s (%s)" % (self.jetFlag, hex(self.mask), self.particleVar, self.sourceKey)
+        self.moreName = "eff. by %s (%s)" % (self.particleVar, self.sourceKey)
         conds = []
         if self.maxDR:
             conds.append("#DeltaR < %s" % self.maxDR)
@@ -53,6 +55,8 @@ class efficiencyHistogrammer(analysisStep):
             self.moreName.replace(")", ", %s)" % conds)
             self.effTitle = (self.effTitle[0], self.effTitle[1]+" (%s)" % conds)
 
+    def passFunc(self, particle, jet):
+        return True
 
     def uponAcceptance(self, eventVars):
         for particle, jet in eventVars[self.sourceKey].iteritems():
@@ -64,7 +68,7 @@ class efficiencyHistogrammer(analysisStep):
                 continue
             x = getattr(particle, self.particleVar)
             self.book.fill(x, self.tagTitle[0], *self.binsMinMax, title=self.tagTitle[1])
-            if getattr(jet, self.jetFlag) & self.mask:
+            if self.passFunc(particle, jet):#getattr(jet, self.jetFlag) & self.mask:
                 self.book.fill(x, self.probeTitle[0], *self.binsMinMax,  title=self.probeTitle[1])
 
 
@@ -84,6 +88,21 @@ class efficiencyHistogrammer(analysisStep):
         print "Output updated with efficiency %s." % self.effTitle[0]
 
 
+class b1EfficiencyHistogrammer(efficiencyHistogrammer):
+    def passFunc(self, particle, jet):
+        return jet.BTag & 0x1
+
+
+class b2EfficiencyHistogrammer(efficiencyHistogrammer):
+    def passFunc(self, particle, jet):
+        return jet.BTag & 0x2
+
+
+class matchEfficiencyHistogrammer(efficiencyHistogrammer):
+    def passFunc(self, particle, jet):
+        return utils.deltaR(particle, jet) < 0.5
+
+
 class iterHistogrammer(analysisStep):
     def __init__(self, var="", attr="", labelIndex=False, maxIndex=None, nBins=None, xMin=None, xMax=None):
         for item in ["var", "attr", "labelIndex", "maxIndex"]:
@@ -91,7 +110,8 @@ class iterHistogrammer(analysisStep):
         self.bins = (nBins, xMin, xMax)
 
     def uponAcceptance(self, eventVars):
-        for i, object in enumerate(eventVars[self.var]):
+        for iObject in range(utils.size(eventVars, self.var)):
+            object = eventVars[self.var][iObject]
             if (self.maxIndex is not None) and self.maxIndex < i:
                 continue
             key = self.attr
