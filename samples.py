@@ -13,7 +13,9 @@ def l(dir="", skip=[], confOverride=""):
 h = supy.samples.SampleHolder()
 
 sigSkip = ["_4.", "_10.", "_21.", "_23.", "_24.", "_35.", "_37.", "_39.", "_44.", "_48.", "_49."] if "n3" in conf else []
-h.add("hh_bbtt", l("GluGluToHHToBBTT_14TeV", skip=sigSkip), xs=2.5*fb)
+h.add("hh_bbtt",    l("GluGluToHHToBBTT_14TeV", skip=sigSkip), xs=2.5*fb)
+h.add("hh_bbtt_c3_pu140", l("GluGluToHHToBBTT_14TeV", confOverride="/PhaseII/Configuration3/140PileUp/", skip=sigSkip), xs=2.5*fb)
+h.add("hh_bbtt_c4_pu140", l("GluGluToHHToBBTT_14TeV", confOverride="/PhaseII/Configuration4/140PileUp/"), xs=2.5*fb)
 
 h.add("B",         l("B-4p-0-1-v1510_14TEV"),          xs=200944.*pb)
 
@@ -72,6 +74,8 @@ h.add("tj_24_1k", l("tj-4p-2400-100000-v1510_14TEV"), xs=0.00312*pb)
 
 h.add("tt_0_6_c0_pu0",   l("tt-4p-0-600-v1510_14TEV", confOverride="/PhaseI/Configuration0/NoPileUp/"),  xs=530.89358*pb)
 h.add("tt_0_6_c0_pu140", l("tt-4p-0-600-v1510_14TEV", confOverride="/PhaseI/Configuration0/140PileUp/"), xs=530.89358*pb)
+h.add("tt_0_6_c3_pu140", l("tt-4p-0-600-v1510_14TEV", confOverride="/PhaseII/Configuration3/140PileUp/"), xs=530.89358*pb)
+h.add("tt_0_6_c4_pu140", l("tt-4p-0-600-v1510_14TEV", confOverride="/PhaseII/Configuration4/140PileUp/"), xs=530.89358*pb)
 
 h.add("tt_0_6",   l("tt-4p-0-600-v1510_14TEV"),       xs=530.89358*pb)
 h.add("tt_6_11",  l("tt-4p-600-1100-v1510_14TEV"),    xs=42.55351*pb)
