@@ -17,6 +17,25 @@ class rho(supy.wrappedChain.calculable):
         self.value = self.source["Rho"][0].HT
 
 
+class window(supy.wrappedChain.calculable):
+    @property
+    def name(self):
+        out = self.var
+        if self.min is not None:
+            out = str(int(self.min))+".le."+out
+        if self.max is not None:
+            out += ".le."+str(int(self.max))
+        return out
+
+    def __init__(self, var, min=None, max=None):
+        for item in ["var", "min", "max"]:
+            setattr(self, item, eval(item))
+
+    def update(self, _):
+        val = self.source[self.var]
+        self.value = self.min <= val and ((self.max is None) or val <= self.max)
+
+
 class SumP4(supy.wrappedChain.calculable):
     @property
     def name(self):
