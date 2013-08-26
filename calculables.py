@@ -86,16 +86,10 @@ class JetMatchedTo(supy.wrappedChain.calculable):
 
     def update(self, _):
         self.value = {}
-        #print
-        #print self.source["Event"][0].Number
         for particle in self.source[self.sourceKey]:
             if self.minPt and particle.PT < self.minPt:
                 continue
             dR = []
-            #print "particle eta=%6.3f, phi=%6.3f, pt=%6.1f" % (particle.Eta, particle.Phi, particle.PT)
             for jet in self.source["Jet"]:
-                #print "jet      eta=%6.3f, phi=%6.3f, pt=%6.1f, DR=%6.3f" % (jet.Eta, jet.Phi, jet.PT, utils.deltaR(particle, jet))
                 dR.append((utils.deltaR(particle, jet), jet))
             self.value[particle] = min(dR)[1] if dR else None
-            #print min(dR)[0], self.value[particle].PT
-        #print
