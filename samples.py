@@ -1,15 +1,14 @@
 import supy
 from units import pb, fb
+import configuration
 
 eos = supy.sites.eos()+"/eos/cms/store/group/phys_higgs/upgrade"
 
-conf = {(0, 0): "/PhaseI/Configuration0/NoPileUp/",
-        (0, 140): "/PhaseI/Configuration0/140PileUp/",
-        (3, 140): "/PhaseII/Configuration3/140PileUp/"
-        }[(3, 140)]
+conf = configuration.detectorConfig()
 
-def l(dir="", skip=[]):
-    return eos+conf+'%s/", itemsToSkip=%s)' % (dir, str(skip))
+def l(dir="", skip=[], confOverride=""):
+    out = eos + (confOverride if confOverride else conf)
+    return out+'%s/", itemsToSkip=%s)' % (dir, str(skip))
 
 h = supy.samples.SampleHolder()
 
@@ -70,11 +69,15 @@ h.add("tj_10_16", l("tj-4p-1000-1600-v1510_14TEV"), xs=0.37680*pb)
 h.add("tj_16_24", l("tj-4p-1600-2400-v1510_14TEV"), xs=0.03462*pb)
 h.add("tj_24_1k", l("tj-4p-2400-100000-v1510_14TEV"), xs=0.00312*pb)
 
-h.add("tt_0_600",       l("tt-4p-0-600-v1510_14TEV"),       xs=530.89358*pb)
-h.add("tt_600_1100",    l("tt-4p-600-1100-v1510_14TEV"),    xs=42.55351*pb)
-h.add("tt_1100_1700",   l("tt-4p-1100-1700-v1510_14TEV"),   xs=4.48209*pb)
-h.add("tt_1700_2500",   l("tt-4p-1700-2500-v1510_14TEV"),   xs=0.52795*pb)
-h.add("tt_2500_100000", l("tt-4p-2500-100000-v1510_14TEV"), xs=0.05449*pb)
+
+h.add("tt_0_6_c0_pu0",   l("tt-4p-0-600-v1510_14TEV", confOverride="/PhaseI/Configuration0/NoPileUp/"),  xs=530.89358*pb)
+h.add("tt_0_6_c0_pu140", l("tt-4p-0-600-v1510_14TEV", confOverride="/PhaseI/Configuration0/140PileUp/"), xs=530.89358*pb)
+
+h.add("tt_0_6",   l("tt-4p-0-600-v1510_14TEV"),       xs=530.89358*pb)
+h.add("tt_6_11",  l("tt-4p-600-1100-v1510_14TEV"),    xs=42.55351*pb)
+h.add("tt_11_17", l("tt-4p-1100-1700-v1510_14TEV"),   xs=4.48209*pb)
+h.add("tt_17_25", l("tt-4p-1700-2500-v1510_14TEV"),   xs=0.52795*pb)
+h.add("tt_25_1k", l("tt-4p-2500-100000-v1510_14TEV"), xs=0.05449*pb)
 
 h.add("ttB_0_9",   l("ttB-4p-0-900-v1510_14TEV"),       xs=2.6673*pb)
 h.add("ttB_9_16",  l("ttB-4p-900-1600-v1510_14TEV"),    xs=0.250469*pb)
