@@ -62,13 +62,15 @@ class Filtered(supy.wrappedChain.calculable):
     def name(self):
         return "%s%ss" % (self.label, self.key)
 
-    def __init__(self, pids=[], label="", ptMin=None, absEtaMax=None, key="Particle", ptSort=False, pt="PT"):
-        for item in ["pids", "label", "ptMin", "absEtaMax", "key", "ptSort", "pt"]:
+    def __init__(self, pids=[], status=[], label="", ptMin=None, absEtaMax=None, key="Particle", ptSort=False, pt="PT"):
+        for item in ["pids", "status", "label", "ptMin", "absEtaMax", "key", "ptSort", "pt"]:
             setattr(self, item, eval(item))
 
         self.moreName = ""
         if self.pids:
             self.moreName += "; pdgId in %s" % str(list(self.pids))
+        if self.status:
+            self.moreName += "; status in %s" % str(list(self.status))
         if self.ptMin:
             self.moreName += "; %g < pT" % self.ptMin
         if self.absEtaMax:
@@ -78,6 +80,8 @@ class Filtered(supy.wrappedChain.calculable):
         self.value = []
         for particle in self.source[self.key]:
             if self.pids and (particle.PID not in self.pids):
+                continue
+            if self.status and (particle.Status not in self.status):
                 continue
             if self.ptMin and (getattr(particle, self.pt) < self.ptMin):
                 continue
