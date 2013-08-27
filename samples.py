@@ -2,15 +2,31 @@ import supy
 from units import pb, fb
 import configuration
 
-eos = supy.sites.eos()+"/eos/cms/store/group/phys_higgs/upgrade"
+site = supy.sites.site()
+conf = configuration.detectorConfig(site)
 
-conf = configuration.detectorConfig()
+if site == "cern":
+    cmd = eos = supy.sites.eos()+"/eos/cms/store/group/phys_higgs/upgrade"
+elif site == "fnal":
+    cmd = supy.sites.pnfs()+"/HTBinned/Delphes-3.0.9.1/"
+else:
+    cmd = ""
+
 
 def l(dir="", skip=[], confOverride=""):
-    out = eos + (confOverride if confOverride else conf)
-    return out+'%s/", itemsToSkip=%s)' % (dir, str(skip))
+    out = cmd + (confOverride if confOverride else conf)
+    out += '%s/", itemsToSkip=%s)' % (dir, str(skip))
+    if site == "cern":
+        return out
+    elif site =="fnal":
+        return out[:-1]+', pruneList=False)'
+
 
 h = supy.samples.SampleHolder()
+
+h.add("tt_0_6_pu0",   l("tt-4p-0-600-v1510_14TEV", confOverride="NoPileUp/"),  xs=530.89358*pb)
+h.add("tt_0_6_pu50",  l("tt-4p-0-600-v1510_14TEV", confOverride="50PileUp/"),  xs=530.89358*pb)
+h.add("tt_0_6_pu140", l("tt-4p-0-600-v1510_14TEV", confOverride="140PileUp/"), xs=530.89358*pb)
 
 sigSkip = ["_4.", "_10.", "_21.", "_23.", "_24.", "_35.", "_37.", "_39.", "_44.", "_48.", "_49."] if "n3" in conf else []
 h.add("hh_bbtt",    l("GluGluToHHToBBTT_14TeV", skip=sigSkip), xs=2.5*fb)
@@ -32,6 +48,11 @@ h.add("Bjj_7_14",  l("Bjj-vbf-4p-700-1400-v1510_14TEV"),    xs=4.34869*pb)
 h.add("Bjj_14_23", l("Bjj-vbf-4p-1400-2300-v1510_14TEV"),   xs=0.32465*pb)
 h.add("Bjj_23_34", l("Bjj-vbf-4p-2300-3400-v1510_14TEV"),   xs=0.03032*pb)
 h.add("Bjj_34_1k", l("Bjj-vbf-4p-3400-100000-v1510_14TEV"), xs=0.00313*pb)
+
+h.add("H_0_3_c0_pu0",     l("H-4p-0-300-v1510_14TEV", confOverride="/PhaseI/Configuration0/NoPileUp/"  ), xs=21.55990*pb)
+h.add("H_0_3_c0_pu140",   l("H-4p-0-300-v1510_14TEV", confOverride="/PhaseI/Configuration0/140PileUp/" ), xs=21.55990*pb)
+h.add("H_0_3_c3_pu140",   l("H-4p-0-300-v1510_14TEV", confOverride="/PhaseII/Configuration3/140PileUp/"), xs=21.55990*pb)
+h.add("H_0_3_c4_pu140",   l("H-4p-0-300-v1510_14TEV", confOverride="/PhaseII/Configuration4/140PileUp/"), xs=21.55990*pb)
 
 h.add("H_0_3",   l("H-4p-0-300-v1510_14TEV"), xs=21.55990*pb)
 h.add("H_3_8",   l("H-4p-300-800-v1510_14TEV"), xs=1.11282*pb)
