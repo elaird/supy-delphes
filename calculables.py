@@ -14,7 +14,10 @@ class HT(supy.wrappedChain.calculable):
 
 class rho(supy.wrappedChain.calculable):
     def update(self, _):
-        self.value = self.source["Rho"][0].HT
+        if "Rho" in self.source:
+            self.value = self.source["Rho"][0].HT
+        else:
+            self.value = None
 
 
 class window(supy.wrappedChain.calculable):

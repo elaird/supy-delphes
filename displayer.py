@@ -77,10 +77,10 @@ class displayer(supy.steps.displayer):
             self.printText("")
             self.printText("")
 
-        if "rho" in eventVars:
+        if "rho" in eventVars and eventVars["rho"] is not None:
             self.printText("rho   %10.1f" % eventVars["rho"])
         else:
-            self.printText("")
+            self.printText("rho   %9s-" % " ")
 
         if "HT" in eventVars:
             self.printText("HT    %10.1f" % eventVars["HT"])
