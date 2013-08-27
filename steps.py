@@ -24,6 +24,8 @@ class matchHistogrammer(analysisStep):
             jetPT = jet.PT if jet else 0.0
             self.book.fill(dr, "DeltaR", 50, 0.0, 5.0, title=";#DeltaR"+self.title)
             self.book.fill(jetPT/particle.PT, "ptRatio", 50, 0.0, 2.0,  title=";jet pT / particle pT"+self.title)
+            self.book.fill((particle.PT, jetPT), "ptPt", (20, 20), (0.0, 0.0), (200.0, 200.0),
+                           title=";particle pT;jet pT"+self.title)
 
 
 class efficiencyHistogrammer(analysisStep):
