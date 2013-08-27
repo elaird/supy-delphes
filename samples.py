@@ -8,6 +8,7 @@ conf = configuration.detectorConfig(site)
 if site == "cern":
     cmd = eos = supy.sites.eos()+"/eos/cms/store/group/phys_higgs/upgrade"
 elif site == "fnal":
+    #or xrootd: root://cmsxrootd.fnal.gov//store/...
     cmd = supy.sites.pnfs()+"/HTBinned/Delphes-3.0.9.1/"
 else:
     cmd = ""
