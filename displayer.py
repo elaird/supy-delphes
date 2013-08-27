@@ -287,11 +287,12 @@ class displayer(supy.steps.displayer):
                 break
 
             lepton = eventVars[leptons][iLepton]
-            self.printText("%5.0f %s %4.1f %4.1f" % (lepton.PT,
-                                                     utils.eta(lepton),
-                                                     lepton.Phi,
-                                                     lepton.IsolationVar,
-                                                     ),
+            iso = "%4.1f" % lepton.IsolationVar if hasattr(lepton, "IsolationVar") else "    "
+            self.printText("%5.0f %s %4.1f %s" % (lepton.PT,
+                                                  utils.eta(lepton),
+                                                  lepton.Phi,
+                                                  iso,
+                                                  ),
                            color=color)
         return
 
