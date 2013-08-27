@@ -1,4 +1,5 @@
 from supy.defaults import *
+import supy
 
 
 def mainTree():
@@ -11,17 +12,27 @@ def initializeROOT(r, cppFiles=[]):
     r.TH1.SetDefaultSumw2(True)
     r.gErrorIgnoreLevel = 2000
     r.gROOT.SetBatch(True)
-    r.gSystem.Load("libDelphes.so")
+
+    site = supy.sites.site()
+    if site == "cern":
+        r.gSystem.Load("libDelphes-3.0.10_ECFA_v1.so")
+    elif site == "fnal":
+        r.gSystem.Load("libDelphes-3.0.9.1.so")
+    else:
+        r.gSystem.Load("libDelphes.so")
 
 
 def useCachedFileLists():
     return False
 
 
-def detectorConfig():
-    #return "/PhaseI/Configuration0/NoPileUp/"
-    #return "/PhaseI/Configuration0/140PileUp/"
-    return "/PhaseII/Configuration3/140PileUp/"
+def detectorConfig(site=""):
+    if site == "cern":
+        #return "/PhaseI/Configuration0/NoPileUp/"
+        #return "/PhaseI/Configuration0/140PileUp/"
+        return "/PhaseII/Configuration3/140PileUp/"
+    elif site == "fnal":
+        return "/140PileUp/"
 
 
 def LorentzVectorType():
