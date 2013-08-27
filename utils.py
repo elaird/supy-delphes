@@ -27,3 +27,11 @@ def deltaPhi(a, b):
 
 def deltaR(a, b):
     return math.sqrt((a.Eta-b.Eta)**2 + deltaPhi(a, b)**2)
+
+#lv1 = supy.utils.LorentzV()
+#lv2 = supy.utils.LorentzV()
+#
+#def deltaR(a, b):
+#    lv1.SetCoordinates(a.PT, a.Eta, a.Phi, a.Mass)
+#    lv2.SetCoordinates(b.PT, b.Eta, b.Phi, b.Mass)
+#    return r.Math.VectorUtil.DeltaR(lv1, lv2)
