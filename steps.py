@@ -33,7 +33,7 @@ class efficiencyHistogrammer(analysisStep):
                      "maxDR", "minPt", "maxAbsEta", "binsMinMax"]:
             setattr(self, item, eval(item))
 
-        stem = "_".join([sourceKey, self.particleVar])#, self.jetFlag, hex(self.mask)])
+        stem = "_".join([sourceKey, self.particleVar])
         self.tagTitle = ("tag_"+stem, ";particle %s (%s, all);matches / bin" % (self.particleVar, self.sourceKey))
         self.probeTitle = ("probe_"+stem,
                            self.tagTitle[1].replace("all)", "passing %s)" % self.name.replace("EfficiencyHistogrammer", "")))
@@ -98,6 +98,11 @@ class b1EfficiencyHistogrammer(efficiencyHistogrammer):
 class b2EfficiencyHistogrammer(efficiencyHistogrammer):
     def passFunc(self, particle, jet):
         return jet.BTag & 0x2
+
+
+class tauEfficiencyHistogrammer(efficiencyHistogrammer):
+    def passFunc(self, particle, jet):
+        return jet.TauTag
 
 
 class matchEfficiencyHistogrammer(efficiencyHistogrammer):
