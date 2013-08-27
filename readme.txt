@@ -7,6 +7,7 @@ See <github.com/elaird/supy>.
 GPLv3 (http://www.gnu.org/licenses/gpl.html)
 Note: libDelphes.so is from
 http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/spadhi/ECFA/Delphes/Delphes-3.0.10_ECFA_v1.tar.gz
+http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/JohnStupak/snowmass/libDelphes.so
 
 ---------------
 | Quick Start |
