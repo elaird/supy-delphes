@@ -9,8 +9,9 @@ class deriveCorrections(supy.analysis):
     def listOfSteps(self, pars):
         return [supy.steps.printer.progressPrinter(),
                 #supy.steps.histos.value("rho", 30, 0.0, 150.0),
+                supy.steps.histos.value("HT", 300, 0.0, 3000.0),
                 supy.steps.filters.multiplicity("bParticles", min=2, max=2),
-                supy.steps.histos.multiplicity("JetMatchedTo_bParticles.values"),
+                supy.steps.histos.mass("bParticlesSumP4", 50, 0.0, 250.0),
                 supy.steps.histos.value("nMatches_JetMatchedTo_bParticles", 5, -0.5, 4.5),
                 supy.steps.filters.value("nMatches_JetMatchedTo_bParticles", min=2, max=2),
                 supy.steps.histos.value("DeltaR_JetMatchedTo_bParticles.values", 100, 0.0, 10.0),
