@@ -1,8 +1,11 @@
+import bisect
 import math
 import units
 import utils
 import ROOT as r
 import supy
+import jec
+
 
 class GenWeight(supy.wrappedChain.calculable):
     def update(self, _):
@@ -27,9 +30,9 @@ class window(supy.wrappedChain.calculable):
     def name(self):
         out = self.var
         if self.min is not None:
-            out = str(int(self.min))+".le."+out
+            out = str(self.min)+".le."+out
         if self.max is not None:
-            out += ".le."+str(int(self.max))
+            out += ".le."+str(self.max)
         return out
 
     def __init__(self, var, min=None, max=None):
@@ -164,10 +167,14 @@ class DeltaR(supy.wrappedChain.calculable):
 
 
 class JetsFixedMass(supy.wrappedChain.calculable):
-    def __init__(self, key="", m=None):
+    @property
+    def name(self):
+        return "JetsFixedMass%s" % ("Corrected" if self.correctPt else "")
+
+    def __init__(self, key="", m=None, correctPt=False):
         assert m is not None
-        self.m = m
-        self.key = key
+        for item in ["key", "m", "correctPt"]:
+            setattr(self, item, eval(item))
         self.lv = [supy.utils.LorentzV(), supy.utils.LorentzV()]
 
     def update(self, _):
@@ -176,15 +183,38 @@ class JetsFixedMass(supy.wrappedChain.calculable):
         assert len(jets) == 2, len(jets)
         assert all(jets), jets
         for i in range(2):
-            self.lv[i].SetCoordinates(jets[i].PT, jets[i].Eta, jets[i].Phi, self.m)
+            pt = jets[i].PT
+            eta = jets[i].Eta
+            if self.correctPt:
+                pt *= jec.factor(pt, eta)
+            self.lv[i].SetCoordinates(pt, eta, jets[i].Phi, self.m)
         self.value = self.lv
 
 
-class jdj(supy.wrappedChain.calculable):
-    @property
-    def name(self):
-        return "jdj_%s" % self.jets
+class JetsCategory(supy.wrappedChain.calculable):
+    def __init__(self, jets="", func=True):
+        for item in ["jets", "func"]:
+            setattr(self, item, eval(item))
 
+        self.etas = [1.4, 2.4, 4.0]
+        self.code = {0:"B", 1:"E", 2:"F", 3:"x"}
+
+    def region(self, eta):
+        h = abs(eta() if self.func else eta)
+        return self.code[bisect.bisect_left(self.etas, h)]
+
+    def update(self, _):
+        jets = self.source[self.jets]
+        assert (len(jets) == 2) and all(jets), jets
+
+        self.value = []
+        for j in jets:
+            self.value.append(self.region(j.Eta))
+        self.value.sort()
+        self.value = "".join(self.value)
+
+
+class jdj(supy.wrappedChain.calculable):
     def __init__(self, jets=""):
         self.jets = jets
 
