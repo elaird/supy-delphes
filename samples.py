@@ -29,10 +29,13 @@ h.add("tt_0_6_pu0",   l("tt-4p-0-600-v1510_14TEV", confOverride="NoPileUp/"),  x
 h.add("tt_0_6_pu50",  l("tt-4p-0-600-v1510_14TEV", confOverride="50PileUp/"),  xs=530.89358*pb)
 h.add("tt_0_6_pu140", l("tt-4p-0-600-v1510_14TEV", confOverride="140PileUp/"), xs=530.89358*pb)
 
-sigSkip = ["_4.", "_10.", "_21.", "_23.", "_24.", "_35.", "_37.", "_39.", "_44.", "_48.", "_49."] if "n3" in conf else []
-h.add("hh_bbtt",    l("GluGluToHHToBBTT_14TeV", skip=sigSkip), xs=2.5*fb)
-h.add("hh_bbtt_c3_pu140", l("GluGluToHHToBBTT_14TeV", confOverride="/PhaseII/Configuration3/140PileUp/", skip=sigSkip), xs=2.5*fb)
-h.add("hh_bbtt_c4_pu140", l("GluGluToHHToBBTT_14TeV", confOverride="/PhaseII/Configuration4/140PileUp/"), xs=2.5*fb)
+# broken
+#h.add("hh_bbtt",    l("GluGluToHHToBBTT_14TeV", skip=sigSkip), xs=2.5*fb)
+#h.add("hh_bbtt_c3_pu140", l("GluGluToHHToBBTT_14TeV", confOverride="/PhaseII/Configuration3/140PileUp/", skip=sigSkip), xs=2.5*fb)
+#h.add("hh_bbtt_c4_pu140", l("GluGluToHHToBBTT_14TeV", confOverride="/PhaseII/Configuration4/140PileUp/"), xs=2.5*fb)
+#h.add("hh_bbtt_test", '["/afs/cern.ch/work/e/elaird/bbttTest.root"]', xs=2.5*fb)
+
+h.add("hh_bbtt", l("HHToBBTT_14TeV", skip=["_80.", "_84.", "_87."] if "n3" in conf else []), xs=2.5*fb)
 
 h.add("B",         l("B-4p-0-1-v1510_14TEV"),          xs=200944.*pb)
 
@@ -65,6 +68,12 @@ h.add("BB_3_7",    l("BB-4p-300-700-v1510_14TEV"),      xs=35.23062*pb)
 h.add("BB_7_13",   l("BB-4p-700-1300-v1510_14TEV"),     xs=4.13743*pb)
 h.add("BB_13_21",  l("BB-4p-1300-2100-v1510_14TEV"),    xs=0.41702*pb)
 h.add("BB_21_1k",  l("BB-4p-2100-100000-v1510_14TEV"),  xs=0.04770*pb)
+
+bbSkim = 'utils.fileListFromDisk(location="/afs/cern.ch/work/e/elaird/BB_skim/%s/")'  # conf3
+h.add("BB_0_3_skim",   bbSkim % "0_3",   xs = 1.234224e-05 * 3.188143e+02*pb)
+h.add("BB_3_7_skim",   bbSkim % "3_7",   xs = 6.641432e-05 * 4.465846e+01*pb)
+h.add("BB_7_13_skim",  bbSkim % "7_13",  xs = 1.450288e-04 * 5.224014e+00*pb)
+h.add("BB_13_21_skim", bbSkim % "13_21", xs = 1.935039e-04 * 5.252171e-01*pb)
 
 h.add("BBB_0_6",   l("BBB-4p-0-600-v1510_14TEV", skip=["BBB-4p-0-600-v1510_14TEV_107277746"]), xs=2.57304*pb)
 h.add("BBB_6_13",  l("BBB-4p-600-1300-v1510_14TEV"),    xs=0.14935*pb)
