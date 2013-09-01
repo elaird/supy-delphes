@@ -100,12 +100,36 @@ class Filtered(supy.wrappedChain.calculable):
             self.value.sort(key=lambda x:getattr(x, self.pt), reverse=True)
 
 
-class bTaggedJets(supy.wrappedChain.calculable):
+class bTagged(supy.wrappedChain.calculable):
+    @property
+    def name(self):
+        return "bTagged_%s_mask%d" % (self.jets, self.mask)
+
+    def __init__(self, jets="", mask=None):
+        assert mask, mask
+        for item in ["jets", "mask"]:
+            setattr(self, item, eval(item))
+
     def update(self, _):
-        print "add mask"
         self.value = []
-        for jet in self.source["Jet"]:
-            if jet.BTag:
+        for jet in self.source[self.jets]:
+            if jet.BTag & self.mask:
+                self.value.append(jet)
+
+
+class tauTagged(supy.wrappedChain.calculable):
+    @property
+    def name(self):
+        return "tauTagged_%s" % self.jets
+
+    def __init__(self, jets=""):
+        for item in ["jets"]:
+            setattr(self, item, eval(item))
+
+    def update(self, _):
+        self.value = []
+        for jet in self.source[self.jets]:
+            if jet.TauTag:
                 self.value.append(jet)
 
 
