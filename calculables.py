@@ -169,11 +169,11 @@ class DeltaR(supy.wrappedChain.calculable):
 class JetsFixedMass(supy.wrappedChain.calculable):
     @property
     def name(self):
-        return "JetsFixedMass%s" % ("Corrected" if self.correctPt else "")
+        return "JetsFixedMass_%s%s" % (self.label, "_Corrected" if self.correctPt else "")
 
-    def __init__(self, key="", m=None, correctPt=False):
+    def __init__(self, key="", m=None, correctPt=False, label=""):
         assert m is not None
-        for item in ["key", "m", "correctPt"]:
+        for item in ["key", "m", "correctPt", "label"]:
             setattr(self, item, eval(item))
         self.lv = [supy.utils.LorentzV(), supy.utils.LorentzV()]
 
@@ -191,7 +191,11 @@ class JetsFixedMass(supy.wrappedChain.calculable):
         self.value = self.lv
 
 
-class JetsCategory(supy.wrappedChain.calculable):
+class Category(supy.wrappedChain.calculable):
+    @property
+    def name(self):
+        return "Category_%s" % self.jets
+
     def __init__(self, jets="", func=True):
         for item in ["jets", "func"]:
             setattr(self, item, eval(item))
@@ -215,6 +219,10 @@ class JetsCategory(supy.wrappedChain.calculable):
 
 
 class jdj(supy.wrappedChain.calculable):
+    @property
+    def name(self):
+        return "jdj_%s" % self.jets
+
     def __init__(self, jets=""):
         self.jets = jets
 
