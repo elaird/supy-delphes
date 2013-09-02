@@ -153,26 +153,8 @@ class JetMatchedTo(supy.wrappedChain.calculable):
                 if self.maxDR and self.maxDR < dr:
                     continue
                 dR.append((dr, jet))
-            self.value[particle] = min(dR)[1] if dR else None
-
-
-class nMatches(supy.wrappedChain.calculable):
-    @property
-    def name(self):
-        return "nMatches_%s" % self.key
-
-    def __init__(self, key="", maxDR=None):
-        self.key = key
-        self.maxDR = maxDR
-        if self.maxDR:
-            self.moreName = "#DeltaR < %g" % self.maxDR
-
-    def update(self, _):
-        self.value = 0
-        for particle, jet in self.source[self.key].iteritems():
-            if (not jet) or (self.maxDR and (self.maxDR < utils.deltaR(particle, jet))):
-                continue
-            self.value += 1
+            if dR:
+                self.value[particle] = min(dR)[1]
 
 
 class DeltaR(supy.wrappedChain.calculable):
