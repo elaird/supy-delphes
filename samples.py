@@ -29,13 +29,11 @@ h.add("tt_0_6_pu0",   l("tt-4p-0-600-v1510_14TEV", confOverride="NoPileUp/"),  x
 h.add("tt_0_6_pu50",  l("tt-4p-0-600-v1510_14TEV", confOverride="50PileUp/"),  xs=530.89358*pb)
 h.add("tt_0_6_pu140", l("tt-4p-0-600-v1510_14TEV", confOverride="140PileUp/"), xs=530.89358*pb)
 
-# broken
-#h.add("hh_bbtt",    l("GluGluToHHToBBTT_14TeV", skip=sigSkip), xs=2.5*fb)
-#h.add("hh_bbtt_c3_pu140", l("GluGluToHHToBBTT_14TeV", confOverride="/PhaseII/Configuration3/140PileUp/", skip=sigSkip), xs=2.5*fb)
-#h.add("hh_bbtt_c4_pu140", l("GluGluToHHToBBTT_14TeV", confOverride="/PhaseII/Configuration4/140PileUp/"), xs=2.5*fb)
-#h.add("hh_bbtt_test", '["/afs/cern.ch/work/e/elaird/bbttTest.root"]', xs=2.5*fb)
-
 h.add("hh_bbtt", l("HHToBBTT_14TeV", skip=["_80.", "_84.", "_87."] if "n3" in conf else []), xs=2.5*fb)
+h.add("hh_bbtt_c0_pu0",   l("HHToBBTT_14TeV", confOverride="/PhaseI/Configuration0/NoPileUp/"), xs=2.5*fb)
+h.add("hh_bbtt_c0_pu140", l("HHToBBTT_14TeV", confOverride="/PhaseI/Configuration0/140PileUp/"), xs=2.5*fb)
+h.add("hh_bbtt_c3_pu140", l("HHToBBTT_14TeV", confOverride="/PhaseII/Configuration3/140PileUp/"), xs=2.5*fb)
+h.add("hh_bbtt_c4_pu140", l("HHToBBTT_14TeV", confOverride="/PhaseII/Configuration4/140PileUp/"), xs=2.5*fb)
 
 h.add("B",         l("B-4p-0-1-v1510_14TEV"),          xs=200944.*pb)
 
