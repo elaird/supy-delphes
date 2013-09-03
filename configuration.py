@@ -30,7 +30,8 @@ def detectorConfig(site=""):
     if site == "cern":
         #return "/PhaseI/Configuration0/NoPileUp/"
         #return "/PhaseI/Configuration0/140PileUp/"
-        return "/PhaseII/Configuration3/140PileUp/"
+        #return "/PhaseII/Configuration3/140PileUp/"
+        return "/PhaseII/Configuration4/140PileUp/"
     elif site == "fnal":
         return "/140PileUp/"
 
