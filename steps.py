@@ -5,51 +5,91 @@ import ROOT as r
 from supy import analysisStep
 import jec
 
-class matchHistogrammer(analysisStep):
-    def __init__(self, sourceKey="", maxDR=None, etas=[], correctPt=False):
-        for item in ["sourceKey", "maxDR", "etas", "correctPt"]:
+class matchPtHistogrammer(analysisStep):
+    def __init__(self, sourceKey="", etas=[], correctPtAxis=False, correctRatio=False):
+        for item in ["sourceKey", "etas", "correctPtAxis", "correctRatio"]:
             setattr(self, item, eval(item))
-        self.title = ";matches / bin"
-        if self.maxDR:
-            extra = " (%s,  #DeltaR<%3.1f)" % (self.sourceKey, self.maxDR)
-        else:
-            extra = " (%s)" % self.sourceKey
-        self.title = extra + self.title
+        self.title = " (%s);matches / bin" % self.sourceKey
+
+    def bbl(self, eta=None):
+        bin = bisect.bisect_left(self.etas, abs(eta))
+        label = ""
+        if bin != 0:
+            label += "%3.1f < " % self.etas[bin-1]
+        label += "jet |#eta|"
+        if bin != len(self.etas):
+            label += " < %3.1f" % self.etas[bin]
+        return bin, label
+
+    def plots(self, jetPt=None, particlePt=None, ratio=None, bin=None, binLabel=""):
+        ppt = "particle pT"
+        jpt = "%sjet pT" % ("c." if self.correctPtAxis else "uc.")
+        ratiot = "%sjet pT / %s" % ("c." if self.correctRatio else "uc.", ppt)
+
+        self.book.fill(ratio,
+                       "ptRatio",
+                       50, 0.0, 2.0,
+                       title=";%s%s" % (ratiot, self.title))
+
+        self.book.fill((particlePt, jetPt),
+                       "ptPt",
+                       (20, 20), (0.0, 0.0), (200.0, 200.0),
+                       title=";%s;%s%s" % (ppt, jpt, self.title))
+
+
+        title = ";%s  (%s);%s%s" % (jpt, binLabel, ratiot, self.title)
+        name = "rjPt_%d" % bin
+        self.book.fill((jetPt, ratio),
+                       name,
+                       (20, 20), (0.0, 0.0), (200.0, 2.0),
+                       title=title)
+
+        self.book.fill((jetPt, ratio),
+                       "%s_prof" % name,
+                       20, 0.0, 200.0,
+                       title=title)
+
+
+        #title = ";%s  (%s);%s%s" % (ppt, binLabel, ratiot, self.title)
+        #name = "rpPt_%d" % bin
+        #self.book.fill((particlePt, ratio),
+        #               name,
+        #               (20, 20), (0.0, 0.0), (200.0, 2.0),
+        #               title=title)
+        #self.book.fill((particlePt, ratio),
+        #               "%s_prof" % name,
+        #               20, 0.0, 200.0,
+        #               title=title)
 
 
     def uponAcceptance(self, eventVars):
         for particle, jet in eventVars[self.sourceKey].iteritems():
-            dr = utils.deltaR(particle, jet) if jet else 999.9
-            if self.maxDR and (self.maxDR < dr):
-                continue
-            jetPT = jet.PT if jet else 0.0
-            jetEta = jet.Eta if jet else 0.0
+            jetPt = jet.PT
+            ratio = jet.PT / particle.PT
+            factor = jec.factor(jetPt, jet.Eta)
+            if self.correctPtAxis:
+                jetPt *= factor
+            if self.correctRatio:
+                ratio *= factor
 
-            if self.correctPt:
-                jetPT *= jec.factor(jetPT, jetEta)
+            bin, binLabel = self.bbl(jet.Eta)
+            self.plots(jetPt=jetPt,
+                       particlePt=particle.PT,
+                       ratio=ratio,
+                       bin=bin,
+                       binLabel=binLabel,
+                       )
 
-            self.book.fill(dr, "DeltaR", 50, 0.0, 5.0, title=";#DeltaR"+self.title)
-            self.book.fill(jetPT/particle.PT, "ptRatio", 50, 0.0, 2.0,  title=";jet pT / particle pT"+self.title)
-            self.book.fill((particle.PT, jetPT), "ptPt", (20, 20), (0.0, 0.0), (200.0, 200.0),
-                           title=";particle pT;jet pT"+self.title)
 
-            bin = bisect.bisect_left(self.etas, abs(particle.Eta))
-            binLabel = ""
-            if bin != 0:
-                binLabel += "%3.1f < " % self.etas[bin-1]
-            binLabel += "|#eta|"
-            if bin != len(self.etas):
-                binLabel += " < %3.1f" % self.etas[bin]
+class matchDRHistogrammer(analysisStep):
+    def __init__(self, key=""):
+        self.key = key
 
-            #self.book.fill((particle.PT, jetPT/particle.PT), "rpPt_%d" % bin, (20, 20), (0.0, 0.0), (200.0, 2.0),
-            #               title=";particle pT  (%s);jet pT / particle pT%s" % (binLabel, self.title))
-            #self.book.fill((particle.PT, jetPT/particle.PT), "rpPt_prof_%d" % bin, 18, 20.0, 200.0,
-            #               title=";particle pT  (%s);jet pT / particle pT%s" % (binLabel, self.title))
-
-            self.book.fill((jetPT, jetPT/particle.PT), "rjPt_%d" % bin, (20, 20), (0.0, 0.0), (200.0, 2.0),
-                           title=";jet pT  (%s);jet pT / particle pT%s" % (binLabel, self.title))
-            self.book.fill((jetPT, jetPT/particle.PT), "rjPt_prof_%d" % bin, 20, 0.0, 200.0,
-                           title=";jet pT  (%s);jet pT / particle pT%s" % (binLabel, self.title))
+    def uponAcceptance(self, eventVars):
+        for particle, jet in eventVars[self.key].iteritems():
+            self.book.fill(utils.deltaR(particle, jet), "DeltaR",
+                           50, 0.0, 5.0,
+                           title=";#DeltaR (%s);matches / bin" % self.key)
 
 
 class efficiencyHistogrammer(analysisStep):
