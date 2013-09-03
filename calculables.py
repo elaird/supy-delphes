@@ -47,7 +47,7 @@ class window(supy.wrappedChain.calculable):
 class SumP4(supy.wrappedChain.calculable):
     @property
     def name(self):
-        return "%sSumP4" % self.label
+        return "%s_SumP4" % self.label
 
     def __init__(self, label=""):
         self.label = label
@@ -136,7 +136,7 @@ class tauTagged(supy.wrappedChain.calculable):
 class JetMatchedTo(supy.wrappedChain.calculable):
     @property
     def name(self):
-        return "JetMatchedTo_%s" % self.sourceKey
+        return "JetMatchedTo_%s%s" % (self.sourceKey, "_noMaxDR" if not self.maxDR else "")
 
     def __init__(self, sourceKey="", minPt=None, maxDR=None):
         for item in ["sourceKey", "minPt", "maxDR"]:
