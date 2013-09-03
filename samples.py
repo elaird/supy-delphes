@@ -34,6 +34,8 @@ h.add("hh_bbtt_c0_pu0",   l("HHToBBTT_14TeV", confOverride="/PhaseI/Configuratio
 h.add("hh_bbtt_c0_pu140", l("HHToBBTT_14TeV", confOverride="/PhaseI/Configuration0/140PileUp/"), xs=2.5*fb)
 h.add("hh_bbtt_c3_pu140", l("HHToBBTT_14TeV", confOverride="/PhaseII/Configuration3/140PileUp/"), xs=2.5*fb)
 h.add("hh_bbtt_c4_pu140", l("HHToBBTT_14TeV", confOverride="/PhaseII/Configuration4/140PileUp/"), xs=2.5*fb)
+h.add("hh_bbtt_c4_10", l("HHToBBTT_10GeVJets_14TeV", confOverride="/PhaseII/Configuration4/140PileUp/"), xs=2.5*fb)
+h.add("hh_bbtt_c4_20", l("HHToBBTT_14TeV",           confOverride="/PhaseII/Configuration4/140PileUp/"), xs=2.5*fb)
 
 h.add("B",         l("B-4p-0-1-v1510_14TEV"),          xs=200944.*pb)
 
