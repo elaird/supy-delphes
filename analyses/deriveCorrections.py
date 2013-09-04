@@ -12,18 +12,19 @@ class deriveCorrections(supy.analysis):
                 #supy.steps.histos.value("HT", 300, 0.0, 3000.0),
                 supy.steps.filters.multiplicity("bParticles", min=2, max=2),
                 supy.steps.histos.mass("bParticles_SumP4", 50, 0.0, 250.0),
-                
+                #steps.iterHistogrammer(var="bParticles", attr="PT", func=False, nBins=30, xMin=0.0, xMax=300.0),
+
                 steps.matchDRHistogrammer("JetMatchedTo_bParticles_noMaxDR"),
 
                 supy.steps.histos.multiplicity("JetMatchedTo_bParticles"),
                 supy.steps.filters.multiplicity("JetMatchedTo_bParticles", min=2, max=2),
                 supy.steps.histos.value("DeltaR_JetMatchedTo_bParticles.values", 100, 0.0, 10.0),
                 supy.steps.filters.value("DeltaR_JetMatchedTo_bParticles.values", min=0.2),
-                
+
                 supy.steps.histos.mass("JetMatchedTo_bParticles.values_SumP4",   50, 0.0, 250.0),
                 supy.steps.histos.mass("JetsFixedMass_bMatched_SumP4",           50, 0.0, 250.0),
                 supy.steps.histos.mass("JetsFixedMass_bMatched_Corrected_SumP4", 50, 0.0, 250.0),
-                
+
                 steps.iterHistogrammer(var="JetsFixedMass_bMatched", attr="pt", func=True,
                                        labelIndex=False, nBins=20, xMin=0.0, xMax=200.0),
 
@@ -102,8 +103,8 @@ class deriveCorrections(supy.analysis):
 
                 ##specify(names="BB_0_3",   weights=w, color=r.kBlue, nEventsMax=n) +
                 ##specify(names="BB_3_7",   weights=w, color=r.kBlue, nEventsMax=n) +
-                ##specify(names="BB_7_13",  weights=w, color=r.kBlue, effectiveLumi=20/fb) +
-                ##specify(names="BB_13_21", weights=w, color=r.kBlue, effectiveLumi=20/fb) +
+                ##specify(names="BB_7_13",  weights=w, color=r.kBlue, nEventsMax=n) +
+                ##specify(names="BB_13_21", weights=w, color=r.kBlue, nEventsMax=n) +
                 ###specify(names="BB_21_1k", weights=w, color=r.kBlue, effectiveLumi=2/fb) +
                 
                 specify(names="hh_bbtt_c4_10",         color=r.kRed, effectiveLumi=20000/fb) +
