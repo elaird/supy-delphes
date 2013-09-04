@@ -14,29 +14,29 @@ f10 = r.TF1("f10", "(1.39735+((x<=60)*((-0.0198145*(x-60))+(-0.000684695*sq(x-60
 f11 = r.TF1("f11", "(1.39433+((x<=50)*((-0.0377563*(x-50))+(-0.00133566*sq(x-50)))))+((x>50)*((-0.00207763*(x-50))+(2.87396e-06*sq(x-50))))", 10, 200)
 
 def f(eta):
-    if abs(eta) < 0.3:
+    if abs(eta) <= 0.3:
         return f0
-    if 3.0 < abs(eta) < 4.0:
+    if 3.0 < abs(eta) <= 4.0:
         return f1
-    if 4.0 < abs(eta):
+    if 4.0 <= abs(eta):
         return f2
-    if 0.3 < abs(eta) < 0.6:
+    if 0.3 < abs(eta) <= 0.6:
         return f3
-    if 0.6 < abs(eta) < 0.9:
+    if 0.6 < abs(eta) <= 0.9:
         return f4
-    if 0.9 < abs(eta) < 1.2:
+    if 0.9 < abs(eta) <= 1.2:
         return f5
-    if 1.2 < abs(eta) < 1.5:
+    if 1.2 < abs(eta) <= 1.5:
         return f6
-    if 1.5 < abs(eta) < 1.8:
+    if 1.5 < abs(eta) <= 1.8:
         return f7
-    if 1.8 < abs(eta) < 2.1:
+    if 1.8 < abs(eta) <= 2.1:
         return f8
-    if 2.1 < abs(eta) < 2.4:
+    if 2.1 < abs(eta) <= 2.4:
         return f9
-    if 2.4 < abs(eta) < 2.7:
+    if 2.4 < abs(eta) <= 2.7:
         return f10
-    if 2.7 < abs(eta) < 3.0:
+    if 2.7 < abs(eta) <= 3.0:
         return f11
 
                                                 
