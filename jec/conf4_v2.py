@@ -18,7 +18,7 @@ def f(eta):
         return f0
     if 3.0 < abs(eta) <= 4.0:
         return f1
-    if 4.0 <= abs(eta):
+    if 4.0 < abs(eta):
         return f2
     if 0.3 < abs(eta) <= 0.6:
         return f3
