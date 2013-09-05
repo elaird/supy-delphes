@@ -18,7 +18,7 @@ class matchPtHistogrammer(analysisStep):
             label += "%3.1f < " % self.etas[bin-1]
         label += "|%s#eta|" % ("jet " if self.useJetEta else "")
         if bin != len(self.etas):
-            label += " < %3.1f" % self.etas[bin]
+            label += " #leq %3.1f" % self.etas[bin]
         return bin, label
 
     def plots(self, jetPt=None, particlePt=None, ratio=None, bin=None, binLabel=""):
