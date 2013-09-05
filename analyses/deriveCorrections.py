@@ -36,13 +36,13 @@ class deriveCorrections(supy.analysis):
                                           correctPtAxis=False,
                                           correctRatio=False,
                                           ),
-                supy.steps.filters.label("corrected"),
-                steps.matchPtHistogrammer("JetMatchedTo_bParticles",
-                                          #etas=[0.6, 1.2, 1.8, 2.4, 3.0, 4.0],
-                                          etas=[0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 4.0],
-                                          correctPtAxis=False,
-                                          correctRatio=True,
-                                          ),
+                #supy.steps.filters.label("corrected"),
+                #steps.matchPtHistogrammer("JetMatchedTo_bParticles",
+                #                          #etas=[0.6, 1.2, 1.8, 2.4, 3.0, 4.0],
+                #                          etas=[0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 4.0],
+                #                          correctPtAxis=False,
+                #                          correctRatio=True,
+                #                          ),
                 #supy.steps.filters.label("corrected2"),
                 #steps.matchPtHistogrammer("JetMatchedTo_bParticles",
                 #                          #etas=[0.6, 1.2, 1.8, 2.4, 3.0, 4.0],
@@ -173,12 +173,14 @@ class deriveCorrections(supy.analysis):
         return func
 
 
-    def profFit(self, histo, dump=False):
+    def profFit(self, histo):
         if type(histo) is not r.TProfile:
             return
 
         if not hasattr(self, "iFunc"):
             self.iFunc = 0
+            self.fitText1 = []
+            self.fitText2 = []
         else :
             self.iFunc += 1
 
@@ -225,19 +227,38 @@ class deriveCorrections(supy.analysis):
         histo.Fit(name, "lrq", "sames")
         histo.GetFunction(name).SetLineWidth(1)
         histo.GetFunction(name).SetLineColor(1+histo.GetLineColor())
-        if dump:
-            s = xtitle.replace("uc.jet pT  (", "")
-            s = s.replace(")", "")
-            s = s.replace("|jet #", "abs(")
-            s = s.replace("|", ")")
-            print "if %s:" % s
-            print "    return f%d" % self.iFunc
 
-            f = histo.GetFunction(name)
-            print 'f%d = r.TF1("f%d", "%s", %g, %g)' % (self.iFunc, self.iFunc,
-                                                        f.GetExpFormula("p"),
-                                                        f.GetXmin(), f.GetXmax())
+        s = xtitle.replace("uc.jet pT  (", "")
+        s = s.replace(")", "")
+        s = s.replace("|jet #", "abs(")
+        s = s.replace("|", ")")
+        s = s.replace("#leq", "<=")
+
+        self.fitText2 += ["if %s:" % s,
+                          "    return f%d" % self.iFunc]
+        f = histo.GetFunction(name)
+        self.fitText1.append('f%d = r.TF1("f%d", "%s", %g, %g)' % (self.iFunc,
+                                                                   self.iFunc,
+                                                                   f.GetExpFormula("p"),
+                                                                   f.GetXmin(),
+                                                                   f.GetXmax())
+                             )
         return func
+
+
+    def dumpFitResults(self, fileName=""):
+        if not hasattr(self, "fitText1"):
+            print "No fit results to dump."
+            return
+        lines = ["import ROOT as r", "", ""]
+        lines += self.fitText1
+        lines += ["", "", "def f(eta):"]
+        lines += ["    "+s for s in self.fitText2]
+        lines += [""]
+
+        f = open(fileName, "w")
+        f.write("\n".join(lines))
+        f.close()
 
 
     def conclude(self, pars):
@@ -281,7 +302,9 @@ class deriveCorrections(supy.analysis):
                      rowColors=[r.kBlack, r.kViolet+4],
 
                      doLog=False,
-                     #fitFunc=self.profFit,
+                     fitFunc=self.profFit,
                      showStatBox=True,
                      optStat=1100,
                      ).plotAll()
+
+        self.dumpFitResults(fileName="fitResults.py")
