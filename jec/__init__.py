@@ -1,4 +1,4 @@
-from conf4_v2 import f
+from conf4_b_v2 import f
 
 def factor(pt, eta):
     func = f(eta)
