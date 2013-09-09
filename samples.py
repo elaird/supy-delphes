@@ -104,11 +104,11 @@ h.add("tj_16_24", l("tj-4p-1600-2400-v1510_14TEV"), xs=0.03462*pb)
 h.add("tj_24_1k", l("tj-4p-2400-100000-v1510_14TEV"), xs=0.00312*pb)
 
 ttSkim = 'utils.fileListFromDisk(location="%s/PhaseII/Configuration4/140PileUp/tt_skim/%s/")' % (skimDir, '%s')
-h.add("tt_c4_0_6_skim",   ttSkim % "0_6",   xs=3.244613e-04 * 6.606681e+02*pb)  # check xs
-h.add("tt_c4_6_11_skim",  ttSkim % "6_11",  xs=9.560593e-04 * 5.291433e+01*pb)
-h.add("tt_c4_11_17_skim", ttSkim % "11_17", xs=1.657924e-03 * 5.576532e+00*pb)
-h.add("tt_c4_17_25_skim", ttSkim % "17_25", xs=2.092512e-03 * 6.568069e-01*pb)
-h.add("tt_c4_25_1k_skim", ttSkim % "25_1k", xs=2.440081e-03 * 6.782036e-02*pb)
+h.add("tt_c4_0_6_skim",   ttSkim % "0_6",   xs=3.244613e-04 * 6.606681e+02*pb * 6.35/5.90)  # ``hacked''
+h.add("tt_c4_6_11_skim",  ttSkim % "6_11",  xs=9.560593e-04 * 5.291433e+01*pb * 1.52/1.32)
+h.add("tt_c4_11_17_skim", ttSkim % "11_17", xs=1.657924e-03 * 5.576532e+00*pb * 2.75/2.40)
+h.add("tt_c4_17_25_skim", ttSkim % "17_25", xs=2.092512e-03 * 6.568069e-01*pb * 4.11/3.44)
+h.add("tt_c4_25_1k_skim", ttSkim % "25_1k", xs=2.440081e-03 * 6.782036e-02*pb * 496./402.)
 
 h.add("tt_0_6_c0_pu0",   l("tt-4p-0-600-v1510_14TEV", confOverride="/PhaseI/Configuration0/NoPileUp/"),  xs=530.89358*pb)
 h.add("tt_0_6_c0_pu140", l("tt-4p-0-600-v1510_14TEV", confOverride="/PhaseI/Configuration0/140PileUp/"), xs=530.89358*pb)
