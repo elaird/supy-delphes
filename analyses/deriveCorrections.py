@@ -2,49 +2,50 @@ import math
 import supy
 import calculables
 import steps
-from units import fb, mb
+from units import fb, mb, mtau
 import ROOT as r
 
 class deriveCorrections(supy.analysis):
-    def listOfSteps(self, pars):
+    def listOfSteps(self, _):
+        p = "b"
         return [supy.steps.printer.progressPrinter(),
                 ##supy.steps.histos.value("rho", 30, 0.0, 150.0),
                 #supy.steps.histos.value("HT", 300, 0.0, 3000.0),
-                supy.steps.filters.multiplicity("bParticles", min=2, max=2),
-                supy.steps.histos.mass("bParticles_SumP4", 50, 0.0, 250.0),
+                supy.steps.filters.multiplicity("%sParticles" % p, min=2, max=2),
+                supy.steps.histos.mass("%sParticles_SumP4" % p, 50, 0.0, 250.0),
                 #steps.iterHistogrammer(var="bParticles", attr="PT", func=False, nBins=30, xMin=0.0, xMax=300.0),
 
-                steps.matchDRHistogrammer("JetMatchedTo_bParticles_noMaxDR"),
+                steps.matchDRHistogrammer("JetMatchedTo_%sParticles_noMaxDR" % p),
 
-                supy.steps.histos.multiplicity("JetMatchedTo_bParticles"),
-                supy.steps.filters.multiplicity("JetMatchedTo_bParticles", min=2, max=2),
-                supy.steps.histos.value("DeltaR_JetMatchedTo_bParticles.values", 100, 0.0, 10.0),
-                supy.steps.filters.value("DeltaR_JetMatchedTo_bParticles.values", min=0.2),
+                supy.steps.histos.multiplicity("JetMatchedTo_%sParticles" % p),
+                supy.steps.filters.multiplicity("JetMatchedTo_%sParticles" % p, min=2, max=2),
+                supy.steps.histos.value("DeltaR_JetMatchedTo_%sParticles.values" % p, 100, 0.0, 10.0),
+                supy.steps.filters.value("DeltaR_JetMatchedTo_%sParticles.values" % p, min=0.2),
 
-                supy.steps.histos.mass("JetMatchedTo_bParticles.values_SumP4",   50, 0.0, 250.0),
-                supy.steps.histos.mass("JetsFixedMass_bMatched_SumP4",           50, 0.0, 250.0),
-                supy.steps.histos.mass("JetsFixedMass_bMatched_Corrected_SumP4", 50, 0.0, 250.0),
+                supy.steps.histos.mass("JetMatchedTo_%sParticles.values_SumP4" % p,   50, 0.0, 250.0),
+                supy.steps.histos.mass("JetsFixedMass_%sMatched_SumP4" % p,           50, 0.0, 250.0),
+                supy.steps.histos.mass("JetsFixedMass_%sMatched_Corrected_SumP4" % p, 50, 0.0, 250.0),
 
-                steps.iterHistogrammer(var="JetsFixedMass_bMatched", attr="pt", func=True,
+                steps.iterHistogrammer(var="JetsFixedMass_%sMatched" % p, attr="pt", func=True,
                                        labelIndex=False, nBins=20, xMin=0.0, xMax=200.0),
 
                 supy.steps.filters.label("uncorrected"),
-                steps.matchDRHistogrammer("JetMatchedTo_bParticles"),
-                steps.matchPtHistogrammer("JetMatchedTo_bParticles",
+                steps.matchDRHistogrammer("JetMatchedTo_%sParticles" % p),
+                steps.matchPtHistogrammer("JetMatchedTo_%sParticles" % p,
                                           #etas=[0.6, 1.2, 1.8, 2.4, 3.0, 4.0],
                                           etas=[0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 4.0],
                                           correctPtAxis=False,
                                           correctRatio=False,
                                           ),
-                supy.steps.filters.label("corrected"),
-                steps.matchPtHistogrammer("JetMatchedTo_bParticles",
-                                          #etas=[0.6, 1.2, 1.8, 2.4, 3.0, 4.0],
-                                          etas=[0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 4.0],
-                                          correctPtAxis=False,
-                                          correctRatio=True,
-                                          ),
+                #supy.steps.filters.label("corrected"),
+                #steps.matchPtHistogrammer("JetMatchedTo_%sParticles" % p,
+                #                          #etas=[0.6, 1.2, 1.8, 2.4, 3.0, 4.0],
+                #                          etas=[0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 4.0],
+                #                          correctPtAxis=False,
+                #                          correctRatio=True,
+                #                          ),
                 #supy.steps.filters.label("corrected2"),
-                #steps.matchPtHistogrammer("JetMatchedTo_bParticles",
+                #steps.matchPtHistogrammer("JetMatchedTo_%sParticles" % p,
                 #                          #etas=[0.6, 1.2, 1.8, 2.4, 3.0, 4.0],
                 #                          etas=[0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 4.0],
                 #                          correctPtAxis=True,
@@ -58,14 +59,14 @@ class deriveCorrections(supy.analysis):
         listOfCalculables += supy.calculables.zeroArgs(calculables)
         listOfCalculables += [calculables.HT(),
                               calculables.rho(),
-                              calculables.Filtered(pids=[-5, 5], label="b", status=[3]),
-                              calculables.Filtered(pids=[-5, 5], label="bKine", ptMin=30.0, absEtaMax=2.4, status=[3]),
                               calculables.Filtered(pids=[23], label="Z", status=[3]),
                               calculables.Filtered(pids=[25], label="h", status=[3]),
+                              ]
+        listOfCalculables += [# b
+                              calculables.Filtered(pids=[-5, 5], label="b", status=[3]),
                               calculables.JetMatchedTo(sourceKey="bParticles"),
                               calculables.JetMatchedTo(sourceKey="bParticles", maxDR=0.3),
                               calculables.SumP4("bParticles"),
-
 
                               supy.calculables.other.values("JetMatchedTo_bParticles"),
                               calculables.DeltaR("JetMatchedTo_bParticles.values"),
@@ -76,9 +77,25 @@ class deriveCorrections(supy.analysis):
                               calculables.SumP4("JetsFixedMass_bMatched"),
                               calculables.JetsFixedMass("JetMatchedTo_bParticles.values", m=mb, correctPt=True, label="bMatched"),
                               calculables.SumP4("JetsFixedMass_bMatched_Corrected"),
-                              # mass 3
-                              calculables.jdj(jets="JetsFixedMass"),
-                              calculables.Category(jets="JetsFixedMass"),
+                              ]
+
+        listOfCalculables += [# tau
+                              calculables.Filtered(pids=[-15, 15], label="tau", status=[3]),
+                              calculables.JetMatchedTo(sourceKey="tauParticles"),
+                              calculables.JetMatchedTo(sourceKey="tauParticles", maxDR=0.3),
+                              calculables.SumP4("tauParticles"),
+
+                              supy.calculables.other.values("JetMatchedTo_tauParticles"),
+                              calculables.DeltaR("JetMatchedTo_tauParticles.values"),
+                              # mass 1
+                              calculables.SumP4("JetMatchedTo_tauParticles.values"),
+                              # mass 2
+                              calculables.JetsFixedMass("JetMatchedTo_tauParticles.values",
+                                                        m=mtau, label="tauMatched"),
+                              calculables.SumP4("JetsFixedMass_tauMatched"),
+                              calculables.JetsFixedMass("JetMatchedTo_tauParticles.values",
+                                                        m=mtau, correctPt=True, label="tauMatched"),
+                              calculables.SumP4("JetsFixedMass_tauMatched_Corrected"),
                               ]
         return listOfCalculables
 
@@ -122,7 +139,71 @@ class deriveCorrections(supy.analysis):
                 )
 
 
-    def profFit_v1(self, histo, dump=False):
+    def dumpFitResults(self, fileName=""):
+        if not hasattr(self, "fitText1"):
+            print "No fit results to dump."
+            return
+        lines = ["import ROOT as r", "", ""]
+        lines += self.fitText1
+        lines += ["", "", "def f(eta):"]
+        lines += ["    "+s for s in self.fitText2]
+        lines += [""]
+
+        f = open(fileName, "w")
+        f.write("\n".join(lines))
+        f.close()
+
+
+    def conclude(self, pars):
+        org = self.organizer(pars, prefixesNoScale=["efficiency_"])
+        def gopts(name="", color=1):
+            return {"name":name, "color":color, "markerStyle":1, "lineWidth":2, "goptions":"ehist"}
+
+        #org.mergeSamples(targetSpec=gopts("BB_0_3",   r.kGreen),   sources=["BB_0_3.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("BB_3_7",   r.kCyan),    sources=["BB_3_7.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("BB_7_13",  r.kMagenta), sources=["BB_7_13.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("BB_13_21", r.kOrange),  sources=["BB_13_21.GenWeight"])
+        org.mergeSamples(targetSpec=gopts("BB", r.kBlue), allWithPrefix="BB_")
+
+        org.mergeSamples(targetSpec=gopts("hh_bb#tau#tau", r.kRed), sources=["hh_bbtt_c4_10"])
+
+        #org.mergeSamples(targetSpec=gopts("H_c0_pu0",         r.kBlack),   sources=["H_0_3_c0_pu0.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("H_c0_pu140",       r.kBlue),    sources=["H_0_3_c0_pu140.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("H_c3_pu140",       r.kGreen),   sources=["H_0_3_c3_pu140.GenWeight"])
+        #org.mergeSamples(targetSpec=gopts("H_c4_pu140",       r.kCyan),    sources=["H_0_3_c4_pu140.GenWeight"])
+
+        #org.mergeSamples(targetSpec=gopts("hh_bbtt_c3_pu140", r.kRed),     sources=["hh_bbtt_c3_pu140"])
+        #org.mergeSamples(targetSpec=gopts("hh_bbtt_c4_pu140", r.kMagenta), sources=["hh_bbtt_c4_pu140"])
+
+        org.mergeSamples(targetSpec=gopts("hh_bbtt_BB", r.kRed),     sources=["hh_bbtt.BB.le.JetsCategory.le.BB"])
+        org.mergeSamples(targetSpec=gopts("hh_bbtt_BE", r.kMagenta), sources=["hh_bbtt.BE.le.JetsCategory.le.BE"])
+        org.mergeSamples(targetSpec=gopts("hh_bbtt_EE", r.kCyan),    sources=["hh_bbtt.EE.le.JetsCategory.le.EE"])
+
+        #org.mergeSamples(targetSpec=gopts("hh_bbtt_c4_pu140",    r.kGreen), sources=["hh_bbtt_c4_pu140"])
+        #org.mergeSamples(targetSpec=gopts("rho<80",     r.kBlack), sources=["hh_bbtt_c4_pu140.rho.le.80"])
+        #org.mergeSamples(targetSpec=gopts("90<rho<100", r.kRed),   sources=["hh_bbtt_c4_pu140.90.le.rho.le.100"])
+        #org.mergeSamples(targetSpec=gopts("110<rho",    r.kBlue),  sources=["hh_bbtt_c4_pu140.110.le.rho"])
+
+        org.scale(1.0/fb)
+        #org.scale(toPdf=True)
+
+        supy.plotter(org,
+                     pdfFileName=self.pdfFileName(org.tag),
+                     printImperfectCalcPageIfEmpty=False,
+                     printXs=True,
+                     blackList=["lumiHisto", "xsHisto", "nJobsHisto"],
+                     rowColors=[r.kBlack, r.kViolet+4],
+
+                     doLog=False,
+                     fitFunc=self.profFit_b_v2,
+                     showStatBox=True,
+                     optStat=1100,
+                     ).plotAll()
+
+        self.dumpFitResults(fileName="fitResults.py")
+
+
+    def profFit_b_v1(self, histo, dump=False):
         assert False
         if type(histo) is not r.TProfile:
             return
@@ -173,12 +254,14 @@ class deriveCorrections(supy.analysis):
         return func
 
 
-    def profFit(self, histo, dump=False):
+    def profFit_b_v2(self, histo):
         if type(histo) is not r.TProfile:
             return
 
         if not hasattr(self, "iFunc"):
             self.iFunc = 0
+            self.fitText1 = []
+            self.fitText2 = []
         else :
             self.iFunc += 1
 
@@ -225,63 +308,94 @@ class deriveCorrections(supy.analysis):
         histo.Fit(name, "lrq", "sames")
         histo.GetFunction(name).SetLineWidth(1)
         histo.GetFunction(name).SetLineColor(1+histo.GetLineColor())
-        if dump:
-            s = xtitle.replace("uc.jet pT  (", "")
-            s = s.replace(")", "")
-            s = s.replace("|jet #", "abs(")
-            s = s.replace("|", ")")
-            print "if %s:" % s
-            print "    return f%d" % self.iFunc
 
-            f = histo.GetFunction(name)
-            print 'f%d = r.TF1("f%d", "%s", %g, %g)' % (self.iFunc, self.iFunc,
-                                                        f.GetExpFormula("p"),
-                                                        f.GetXmin(), f.GetXmax())
+        s = xtitle.replace("uc.jet pT  (", "")
+        s = s.replace(")", "")
+        s = s.replace("|jet #", "abs(")
+        s = s.replace("|", ")")
+        s = s.replace("#leq", "<=")
+
+        self.fitText2 += ["if %s:" % s,
+                          "    return f%d" % self.iFunc]
+        f = histo.GetFunction(name)
+        self.fitText1.append('f%d = r.TF1("f%d", "%s", %g, %g)' % (self.iFunc,
+                                                                   self.iFunc,
+                                                                   f.GetExpFormula("p"),
+                                                                   f.GetXmin(),
+                                                                   f.GetXmax())
+                             )
         return func
 
 
-    def conclude(self, pars):
-        org = self.organizer(pars, prefixesNoScale=["efficiency_"])
-        def gopts(name="", color=1):
-            return {"name":name, "color":color, "markerStyle":1, "lineWidth":2, "goptions":"ehist"}
+    def profFit_tau_v2(self, histo):
+        if type(histo) is not r.TProfile:
+            return
 
-        #org.mergeSamples(targetSpec=gopts("BB_0_3",   r.kGreen),   sources=["BB_0_3.GenWeight"])
-        #org.mergeSamples(targetSpec=gopts("BB_3_7",   r.kCyan),    sources=["BB_3_7.GenWeight"])
-        #org.mergeSamples(targetSpec=gopts("BB_7_13",  r.kMagenta), sources=["BB_7_13.GenWeight"])
-        #org.mergeSamples(targetSpec=gopts("BB_13_21", r.kOrange),  sources=["BB_13_21.GenWeight"])
-        org.mergeSamples(targetSpec=gopts("BB", r.kBlue), allWithPrefix="BB_")
+        if not hasattr(self, "iFunc"):
+            self.iFunc = 0
+            self.fitText1 = []
+            self.fitText2 = []
+        else :
+            self.iFunc += 1
 
-        org.mergeSamples(targetSpec=gopts("hh_bb#tau#tau", r.kRed), sources=["hh_bbtt_c4_10"])
+        r.gStyle.SetOptFit(1111)
+        name = "func"
+        min = 10.0
+        max = 120.0
+        x = 60.0
+        xtitle = histo.GetXaxis().GetTitle()
+        if ("0.3" in xtitle) and ("0.6" not in xtitle):
+            x = 70.0
+            max = 150.0
+        #if ("0.3" in xtitle) and ("0.6" in xtitle):
+        #    x = 90.0
+        #    max = 90.0
+        if ("0.6" in xtitle) and ("0.9" in xtitle):
+            x = 60.0
+        if ("0.9" in xtitle) and ("1.2" in xtitle):
+            x = 70.0
+            max = 170.0
+        #if ("1.2" in xtitle) and ("1.5" in xtitle):
+        #    x = 80.0
+        #if ("1.8" in xtitle) and ("2.1" in xtitle):
+        #    max = 170.0
+        if ("2.1" in xtitle) and ("2.4" in xtitle):
+            x = 50.0
+        if ("2.4" in xtitle) and ("2.7" in xtitle):
+            x = 60.0
+        if ("2.7" in xtitle) and ("3.0" in xtitle):
+            x = 50.0
+        if ("3.0" in xtitle) and ("4.0" in xtitle):
+            x = 60.0
 
-        #org.mergeSamples(targetSpec=gopts("H_c0_pu0",         r.kBlack),   sources=["H_0_3_c0_pu0.GenWeight"])
-        #org.mergeSamples(targetSpec=gopts("H_c0_pu140",       r.kBlue),    sources=["H_0_3_c0_pu140.GenWeight"])
-        #org.mergeSamples(targetSpec=gopts("H_c3_pu140",       r.kGreen),   sources=["H_0_3_c3_pu140.GenWeight"])
-        #org.mergeSamples(targetSpec=gopts("H_c4_pu140",       r.kCyan),    sources=["H_0_3_c4_pu140.GenWeight"])
+        s = "[0]"
+        s += " + (x <= %g)*([1]*(x-%g) + [2]*(x-%g)**2)" % (x, x, x)
+        s += " + (x  > %g)*([3]*(x-%g) + [4]*(x-%g)**2)" % (x, x, x)
+        func = r.TF1(name, s, min, max)
+        func.SetParameters(1.0, 0.0, 0.0, 0.0, 0.0)
 
-        #org.mergeSamples(targetSpec=gopts("hh_bbtt_c3_pu140", r.kRed),     sources=["hh_bbtt_c3_pu140"])
-        #org.mergeSamples(targetSpec=gopts("hh_bbtt_c4_pu140", r.kMagenta), sources=["hh_bbtt_c4_pu140"])
+        #if ("4.0" in xtitle) and not ("3.0" in xtitle):
+        #    func = r.TF1("func", "1.0", 10.0, 80.0)
 
-        org.mergeSamples(targetSpec=gopts("hh_bbtt_BB", r.kRed),     sources=["hh_bbtt.BB.le.JetsCategory.le.BB"])
-        org.mergeSamples(targetSpec=gopts("hh_bbtt_BE", r.kMagenta), sources=["hh_bbtt.BE.le.JetsCategory.le.BE"])
-        org.mergeSamples(targetSpec=gopts("hh_bbtt_EE", r.kCyan),    sources=["hh_bbtt.EE.le.JetsCategory.le.EE"])
+        histo.Fit(name, "lrq", "sames")
+        histo.GetFunction(name).SetLineWidth(1)
+        histo.GetFunction(name).SetLineColor(1+histo.GetLineColor())
 
-        #org.mergeSamples(targetSpec=gopts("hh_bbtt_c4_pu140",    r.kGreen), sources=["hh_bbtt_c4_pu140"])
-        #org.mergeSamples(targetSpec=gopts("rho<80",     r.kBlack), sources=["hh_bbtt_c4_pu140.rho.le.80"])
-        #org.mergeSamples(targetSpec=gopts("90<rho<100", r.kRed),   sources=["hh_bbtt_c4_pu140.90.le.rho.le.100"])
-        #org.mergeSamples(targetSpec=gopts("110<rho",    r.kBlue),  sources=["hh_bbtt_c4_pu140.110.le.rho"])
+        s = xtitle.replace("uc.jet pT  (", "")
+        s = s.replace(")", "")
+        s = s.replace("|jet #", "abs(")
+        s = s.replace("|", ")")
+        s = s.replace("#leq", "<=")
 
-        org.scale(1.0/fb)
-        #org.scale(toPdf=True)
+        self.fitText2 += ["if %s:" % s,
+                          "    return f%d" % self.iFunc]
+        f = histo.GetFunction(name)
+        self.fitText1.append('f%d = r.TF1("f%d", "%s", %g, %g)' % (self.iFunc,
+                                                                   self.iFunc,
+                                                                   f.GetExpFormula("p"),
+                                                                   f.GetXmin(),
+                                                                   f.GetXmax())
+                             )
+        return func
 
-        supy.plotter(org,
-                     pdfFileName=self.pdfFileName(org.tag),
-                     printImperfectCalcPageIfEmpty=False,
-                     printXs=True,
-                     blackList=["lumiHisto", "xsHisto", "nJobsHisto"],
-                     rowColors=[r.kBlack, r.kViolet+4],
 
-                     doLog=False,
-                     #fitFunc=self.profFit,
-                     showStatBox=True,
-                     optStat=1100,
-                     ).plotAll()
