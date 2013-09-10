@@ -65,6 +65,22 @@ class SumP4(supy.wrappedChain.calculable):
                 self.value += particle
 
 
+class LvSumP4(supy.wrappedChain.calculable):
+    @property
+    def name(self):
+        return "%s_LvSumP4" % self.label
+
+    def __init__(self, label="", keys=[]):
+        for item in ["label", "keys"]:
+            setattr(self, item, eval(item))
+        self.value = supy.utils.LorentzV()
+
+    def update(self, _):
+        self.value.SetCoordinates(0.0, 0.0, 0.0, 0.0)
+        for key in self.keys:
+            self.value += self.source[key]
+
+
 class Filtered(supy.wrappedChain.calculable):
     @property
     def name(self):
