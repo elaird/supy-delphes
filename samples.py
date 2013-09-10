@@ -23,19 +23,25 @@ def l(dir="", skip=[], confOverride=""):
         return out[:-1]+', pruneList=False)'
 
 
+skimDir = "/afs/cern.ch/work/e/elaird/delphes/"
+
 h = supy.samples.SampleHolder()
 
 h.add("tt_0_6_pu0",   l("tt-4p-0-600-v1510_14TEV", confOverride="NoPileUp/"),  xs=530.89358*pb)
 h.add("tt_0_6_pu50",  l("tt-4p-0-600-v1510_14TEV", confOverride="50PileUp/"),  xs=530.89358*pb)
 h.add("tt_0_6_pu140", l("tt-4p-0-600-v1510_14TEV", confOverride="140PileUp/"), xs=530.89358*pb)
 
-h.add("hh_bbtt", l("HHToBBTT_14TeV", skip=["_80.", "_84.", "_87."] if "n3" in conf else []), xs=2.5*fb)
+h.add("hh_bbtt",  l("HHToBBTT_14TeV", skip=["_80.", "_84.", "_87."] if "n3" in conf else []), xs=2.5*fb)
 h.add("hh_bbtt_c0_pu0",   l("HHToBBTT_14TeV", confOverride="/PhaseI/Configuration0/NoPileUp/"), xs=2.5*fb)
 h.add("hh_bbtt_c0_pu140", l("HHToBBTT_14TeV", confOverride="/PhaseI/Configuration0/140PileUp/"), xs=2.5*fb)
 h.add("hh_bbtt_c3_pu140", l("HHToBBTT_14TeV", confOverride="/PhaseII/Configuration3/140PileUp/"), xs=2.5*fb)
 h.add("hh_bbtt_c4_pu140", l("HHToBBTT_14TeV", confOverride="/PhaseII/Configuration4/140PileUp/"), xs=2.5*fb)
-h.add("hh_bbtt_c4_10", l("HHToBBTT_10GeVJets_14TeV", confOverride="/PhaseII/Configuration4/140PileUp/"), xs=2.5*fb)
-h.add("hh_bbtt_c4_20", l("HHToBBTT_14TeV",           confOverride="/PhaseII/Configuration4/140PileUp/"), xs=2.5*fb)
+h.add("hh_bbtt_c4_10",    l("HHToBBTT_10GeVJets_14TeV", confOverride="/PhaseII/Configuration4/140PileUp/"), xs=2.5*fb)
+h.add("hh_bbtt_c4_20",    l("HHToBBTT_14TeV",           confOverride="/PhaseII/Configuration4/140PileUp/"), xs=2.5*fb)
+
+hhSkim = 'utils.fileListFromDisk(location="%s/PhaseII/Configuration4/140PileUp/hh_skim_v2/%s/")' % (skimDir, '%s')
+h.add("hh_bbtt_c4_10_skim", hhSkim % '10GeV', xs=9.439792e-03 * 2.500000e-03)
+h.add("hh_bbtt_c4_20_skim", hhSkim % '20GeV', xs=5.575478e-03 * 2.500000e-03)
 
 h.add("B",         l("B-4p-0-1-v1510_14TEV"),          xs=200944.*pb)
 
@@ -69,7 +75,6 @@ h.add("BB_7_13",   l("BB-4p-700-1300-v1510_14TEV"),     xs=4.13743*pb)
 h.add("BB_13_21",  l("BB-4p-1300-2100-v1510_14TEV"),    xs=0.41702*pb)
 h.add("BB_21_1k",  l("BB-4p-2100-100000-v1510_14TEV"),  xs=0.04770*pb)
 
-skimDir = "/afs/cern.ch/work/e/elaird/delphes/"
 bbSkim = 'utils.fileListFromDisk(location="%s/PhaseII/Configuration3/140PileUp/BB_skim/%s/")' % (skimDir, '%s')
 h.add("BB_c3_0_3_skim",   bbSkim % "0_3",   xs = 1.234224e-05 * 3.188143e+02*pb)
 h.add("BB_c3_3_7_skim",   bbSkim % "3_7",   xs = 6.641432e-05 * 4.465846e+01*pb)
@@ -103,12 +108,19 @@ h.add("tj_10_16", l("tj-4p-1000-1600-v1510_14TEV"), xs=0.37680*pb)
 h.add("tj_16_24", l("tj-4p-1600-2400-v1510_14TEV"), xs=0.03462*pb)
 h.add("tj_24_1k", l("tj-4p-2400-100000-v1510_14TEV"), xs=0.00312*pb)
 
-ttSkim = 'utils.fileListFromDisk(location="%s/PhaseII/Configuration4/140PileUp/tt_skim/%s/")' % (skimDir, '%s')
-h.add("tt_c4_0_6_skim",   ttSkim % "0_6",   xs=3.244613e-04 * 6.606681e+02*pb * 6.35/5.90)  # ``hacked''
-h.add("tt_c4_6_11_skim",  ttSkim % "6_11",  xs=9.560593e-04 * 5.291433e+01*pb * 1.52/1.32)
-h.add("tt_c4_11_17_skim", ttSkim % "11_17", xs=1.657924e-03 * 5.576532e+00*pb * 2.75/2.40)
-h.add("tt_c4_17_25_skim", ttSkim % "17_25", xs=2.092512e-03 * 6.568069e-01*pb * 4.11/3.44)
-h.add("tt_c4_25_1k_skim", ttSkim % "25_1k", xs=2.440081e-03 * 6.782036e-02*pb * 496./402.)
+#ttSkim = 'utils.fileListFromDisk(location="%s/PhaseII/Configuration4/140PileUp/tt_skim_v1/%s/")' % (skimDir, '%s')
+#h.add("tt_c4_0_6_skim",   ttSkim % "0_6",   xs=3.244613e-04 * 6.606681e+02*pb * 6.35/5.90)  # ``hacked''
+#h.add("tt_c4_6_11_skim",  ttSkim % "6_11",  xs=9.560593e-04 * 5.291433e+01*pb * 1.52/1.32)
+#h.add("tt_c4_11_17_skim", ttSkim % "11_17", xs=1.657924e-03 * 5.576532e+00*pb * 2.75/2.40)
+#h.add("tt_c4_17_25_skim", ttSkim % "17_25", xs=2.092512e-03 * 6.568069e-01*pb * 4.11/3.44)
+#h.add("tt_c4_25_1k_skim", ttSkim % "25_1k", xs=2.440081e-03 * 6.782036e-02*pb * 496./402.)
+
+ttSkim = 'utils.fileListFromDisk(location="%s/PhaseII/Configuration4/140PileUp/tt_skim_v2/%s/")' % (skimDir, '%s')
+h.add("tt_c4_0_6_skim",   ttSkim % "0_6",   xs=4.378638e-04 * 5.308936e+02)
+h.add("tt_c4_6_11_skim",  ttSkim % "6_11",  xs=1.378834e-03 * 4.255351e+01)
+h.add("tt_c4_11_17_skim", ttSkim % "11_17", xs=2.391672e-03 * 4.482090e+00)
+h.add("tt_c4_17_25_skim", ttSkim % "17_25", xs=3.110121e-03 * 5.279500e-01)
+h.add("tt_c4_25_1k_skim", ttSkim % "25_1k", xs=3.746964e-03 * 5.449000e-02)
 
 h.add("tt_0_6_c0_pu0",   l("tt-4p-0-600-v1510_14TEV", confOverride="/PhaseI/Configuration0/NoPileUp/"),  xs=530.89358*pb)
 h.add("tt_0_6_c0_pu140", l("tt-4p-0-600-v1510_14TEV", confOverride="/PhaseI/Configuration0/140PileUp/"), xs=530.89358*pb)
