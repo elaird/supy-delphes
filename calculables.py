@@ -188,6 +188,23 @@ class DeltaR(supy.wrappedChain.calculable):
         self.value = utils.deltaR(*objs)
 
 
+class Duplicates(supy.wrappedChain.calculable):
+    @property
+    def name(self):
+        return "Duplicates_%s_%s" % (self.key1, self.key2)
+
+    def __init__(self, key1="", key2="", minDR=None):
+        for item in ["key1", "key2", "minDR"]:
+            setattr(self, item, eval(item))
+
+    def update(self, _):
+        self.value = []
+        for j1 in self.source[self.key1]:
+            for j2 in self.source[self.key2]:
+                if utils.deltaR(j1, j2) < self.minDR:
+                    self.value.append((j1, j2))
+
+
 class JetsFixedMass(supy.wrappedChain.calculable):
     @property
     def name(self):
