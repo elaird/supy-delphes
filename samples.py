@@ -108,19 +108,19 @@ h.add("tj_10_16", l("tj-4p-1000-1600-v1510_14TEV"), xs=0.37680*pb)
 h.add("tj_16_24", l("tj-4p-1600-2400-v1510_14TEV"), xs=0.03462*pb)
 h.add("tj_24_1k", l("tj-4p-2400-100000-v1510_14TEV"), xs=0.00312*pb)
 
-#ttSkim = 'utils.fileListFromDisk(location="%s/PhaseII/Configuration4/140PileUp/tt_skim_v1/%s/")' % (skimDir, '%s')
-#h.add("tt_c4_0_6_skim",   ttSkim % "0_6",   xs=3.244613e-04 * 6.606681e+02*pb * 6.35/5.90)  # ``hacked''
-#h.add("tt_c4_6_11_skim",  ttSkim % "6_11",  xs=9.560593e-04 * 5.291433e+01*pb * 1.52/1.32)
-#h.add("tt_c4_11_17_skim", ttSkim % "11_17", xs=1.657924e-03 * 5.576532e+00*pb * 2.75/2.40)
-#h.add("tt_c4_17_25_skim", ttSkim % "17_25", xs=2.092512e-03 * 6.568069e-01*pb * 4.11/3.44)
-#h.add("tt_c4_25_1k_skim", ttSkim % "25_1k", xs=2.440081e-03 * 6.782036e-02*pb * 496./402.)
-
 ttSkim = 'utils.fileListFromDisk(location="%s/PhaseII/Configuration4/140PileUp/tt_skim_v2/%s/")' % (skimDir, '%s')
 h.add("tt_c4_0_6_skim",   ttSkim % "0_6",   xs=4.378638e-04 * 5.308936e+02)
 h.add("tt_c4_6_11_skim",  ttSkim % "6_11",  xs=1.378834e-03 * 4.255351e+01)
 h.add("tt_c4_11_17_skim", ttSkim % "11_17", xs=2.391672e-03 * 4.482090e+00)
 h.add("tt_c4_17_25_skim", ttSkim % "17_25", xs=3.110121e-03 * 5.279500e-01)
 h.add("tt_c4_25_1k_skim", ttSkim % "25_1k", xs=3.746964e-03 * 5.449000e-02)
+
+ttSkim = 'utils.fileListFromDisk(location="%s/PhaseI/Configuration0/NoPileUp/tt_skim_v2/%s/")' % (skimDir, '%s')
+h.add("tt_c0_0PU_0_6_skim",   ttSkim % '0_6',   xs=1.207047e-03 * 5.308936e+02)
+h.add("tt_c0_0PU_6_11_skim",  ttSkim % '6_11',  xs=2.468778e-03 * 4.255351e+01)
+h.add("tt_c0_0PU_11_17_skim", ttSkim % '11_17', xs=3.333778e-03 * 4.482090e+00)
+h.add("tt_c0_0PU_17_25_skim", ttSkim % '17_25', xs=3.968942e-03 * 5.279500e-01)
+h.add("tt_c0_0PU_25_1k_skim", ttSkim % '25_1k', xs=4.538753e-03 * 5.449000e-02)
 
 h.add("tt_0_6_c0_pu0",   l("tt-4p-0-600-v1510_14TEV", confOverride="/PhaseI/Configuration0/NoPileUp/"),  xs=530.89358*pb)
 h.add("tt_0_6_c0_pu140", l("tt-4p-0-600-v1510_14TEV", confOverride="/PhaseI/Configuration0/140PileUp/"), xs=530.89358*pb)
