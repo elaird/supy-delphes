@@ -16,19 +16,20 @@ class reco(supy.analysis):
                 supy.steps.histos.multiplicity("tauTagged_Jets"),
                 supy.steps.filters.multiplicity("tauTagged_Jets", min=2, max=2),
                 supy.steps.histos.value("HT", 50, 0.0, 2500.0),
-                
+                supy.steps.histos.multiplicity("Duplicates_bTagged_Jets_mask1_tauTagged_Jets"),
+                supy.steps.filters.multiplicity("Duplicates_bTagged_Jets_mask1_tauTagged_Jets", max=0),
+
                 #supy.steps.histos.mass("bTagged_Jets_mask1_SumP4",              50, 0.0, 250.0),
                 #supy.steps.histos.mass("JetsFixedMass_bTagged_SumP4",           50, 0.0, 250.0),
                 supy.steps.histos.mass("JetsFixedMass_bTagged_Corrected_SumP4", 50, 0.0, 250.0),
-                supy.steps.filters.mass("JetsFixedMass_bTagged_Corrected_SumP4", min=85.0, max=150.0),
+                supy.steps.filters.mass("JetsFixedMass_bTagged_Corrected_SumP4", min=100.0, max=140.0),
                 supy.steps.histos.mass("JetsFixedMass_bTagged_Corrected_SumP4", 50, 0.0, 250.0),
                 
                 #supy.steps.histos.mass("tauTagged_Jets_SumP4",                    50, 0.0, 250.0),
                 #supy.steps.histos.mass("JetsFixedMass_tauTagged_SumP4",           50, 0.0, 250.0),
                 supy.steps.histos.mass("JetsFixedMass_tauTagged_Corrected_SumP4", 25, 0.0, 250.0),
-                supy.steps.filters.mass("JetsFixedMass_tauTagged_Corrected_SumP4", min=75.0, max=175.0),
+                supy.steps.filters.mass("JetsFixedMass_tauTagged_Corrected_SumP4", min=75.0, max=125.0),
                 supy.steps.histos.mass("JetsFixedMass_tauTagged_Corrected_SumP4", 50, 0.0, 250.0),
-                supy.steps.histos.multiplicity("tauParticles"),
 
                 supy.steps.histos.mass("bbtt_LvSumP4", 32, 0.0, 800.0),
                 supy.steps.filters.mass("bbtt_LvSumP4", min=350.0),
@@ -41,6 +42,7 @@ class reco(supy.analysis):
 
                 supy.steps.histos.multiplicity("tauParticles"),
                 supy.steps.histos.value("HT", 50, 0.0, 2500.0),
+                #steps.displayer(),
                 ]
 
 
@@ -49,10 +51,12 @@ class reco(supy.analysis):
         listOfCalculables += supy.calculables.zeroArgs(calculables)
         listOfCalculables += [calculables.HT(),
                               calculables.rho(),
+                              calculables.Filtered(pids=[-5, 5], label="b", status=[3]),
                               calculables.Filtered(pids=[-15, 15], label="tau", status=[3]),
                               calculables.Filtered(label="", ptMin=10.0, absEtaMax=2.4, key="Jet"),
                               calculables.bTagged("Jets", mask=0x1),
                               calculables.tauTagged("Jets"),
+                              calculables.Duplicates(key1="bTagged_Jets_mask1", key2="tauTagged_Jets", minDR=0.2),
 
                               # mbb
                               calculables.SumP4("bTagged_Jets_mask1"),
@@ -146,13 +150,14 @@ class reco(supy.analysis):
                      rowColors=[r.kBlack, r.kViolet+4],
 
                      doLog=True,
+                     pegMinimum=0.1,
                      #optStat=1100,
                      optStat=1111,
                      #fitFunc=self.profFit,
                      showStatBox=False,
                      latexYieldTable=False,
-                     #samplesForRatios=("hh_bbtt", "tt"),
-                     #sampleLabelsForRatios=("hh", "tt"),
+                     samplesForRatios=("hh_bb#tau#tau", "tt"),
+                     sampleLabelsForRatios=("hh", "tt"),
                      foms=[{"value": lambda x, y: x/y,
                             "uncRel": lambda x, y, xUnc, yUnc: math.sqrt((xUnc/x)**2 + (yUnc/y)**2),
                             "label": lambda x, y:"%s/%s" % (x, y),
