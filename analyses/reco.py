@@ -40,9 +40,13 @@ class reco(supy.analysis):
                 supy.steps.histos.pt("JetsFixedMass_tauTagged_Corrected_SumP4", 12, 0.0, 300.0),
                 supy.steps.filters.pt("JetsFixedMass_tauTagged_Corrected_SumP4", min=100.0),
 
+                supy.steps.histos.multiplicity("bParticles"),
                 supy.steps.histos.multiplicity("tauParticles"),
                 supy.steps.histos.value("HT", 50, 0.0, 2500.0),
+                supy.steps.histos.value("DeltaR_bTagged_Jets_mask1", 30, 0.0, 3.0),
+                supy.steps.histos.value("DeltaR_tauTagged_Jets", 30, 0.0, 3.0),
                 #steps.displayer(),
+                #supy.steps.filters.value("DeltaR_tauTagged_Jets", min=0.7),
                 ]
 
 
@@ -57,6 +61,8 @@ class reco(supy.analysis):
                               calculables.bTagged("Jets", mask=0x1),
                               calculables.tauTagged("Jets"),
                               calculables.Duplicates(key1="bTagged_Jets_mask1", key2="tauTagged_Jets", minDR=0.2),
+                              calculables.DeltaR("bTagged_Jets_mask1"),
+                              calculables.DeltaR("tauTagged_Jets"),
 
                               # mbb
                               calculables.SumP4("bTagged_Jets_mask1"),
@@ -88,26 +94,22 @@ class reco(supy.analysis):
         from supy.samples import specify
         w = calculables.GenWeight()
 
-        n = 100000
-        nSmall = 40000
-        el = 20000/fb
-        return (specify(names="tt_c4_0_6_skim",   weights=w, color=r.kBlue, nEventsMax=nSmall) +
-                specify(names="tt_c4_6_11_skim",  weights=w, color=r.kBlue, nEventsMax=nSmall) +
-                specify(names="tt_c4_11_17_skim", weights=w, color=r.kBlue, nEventsMax=nSmall) +
-                specify(names="tt_c4_17_25_skim", weights=w, color=r.kBlue, nEventsMax=nSmall) +
-                specify(names="tt_c4_25_1k_skim", weights=w, color=r.kBlue, nEventsMax=nSmall) +
+        el = 1e5/fb
+        return (specify(names="tt_c4_0_6_skim",   weights=w, effectiveLumi=el) +
+                specify(names="tt_c4_6_11_skim",  weights=w, effectiveLumi=el) +
+                specify(names="tt_c4_11_17_skim", weights=w, effectiveLumi=el) +
+                specify(names="tt_c4_17_25_skim", weights=w, effectiveLumi=el) +
+                specify(names="tt_c4_25_1k_skim", weights=w, effectiveLumi=el) +
+                #specify(names="hh_bbtt_c4_10_skim") +
+                specify(names="hh_bbtt_c4_20_skim") +
 
-                #specify(names="tt_0_6",   weights=w) + #, color=r.kBlack, nEventsMax=n) +
-                #specify(names="tt_6_11",  weights=w) + #, color=r.kBlack, nEventsMax=n) +
-                #specify(names="tt_11_17", weights=w) + #, color=r.kBlack, effectiveLumi=40/fb) +
-                #specify(names="tt_17_25", weights=w) + #, color=r.kBlack, nEventsMax=n) + #effectiveLumi=20/fb) +
-                #specify(names="tt_25_1k", weights=w) + #, color=r.kBlack, nEventsMax=n) + #effectiveLumi=200/fb) +
-                
-                #specify(names="hh_bbtt_c4_10", color=r.kBlack,  effectiveLumi=el) +
-                #specify(names="hh_bbtt_c4_20", color=r.kBlack,  effectiveLumi=el) +
-
-                #specify(names="hh_bbtt_c4_10_skim", color=r.kBlack,  effectiveLumi=el) +
-                specify(names="hh_bbtt_c4_20_skim", color=r.kBlack,  effectiveLumi=el) +
+                #specify(names="tt_0_6",   weights=w) + #, nEventsMax=n) +
+                #specify(names="tt_6_11",  weights=w) + #, nEventsMax=n) +
+                #specify(names="tt_11_17", weights=w) + #, effectiveLumi=40/fb) +
+                #specify(names="tt_17_25", weights=w) + #, nEventsMax=n) + #effectiveLumi=20/fb) +
+                #specify(names="tt_25_1k", weights=w) + #, nEventsMax=n) + #effectiveLumi=200/fb) +
+                #specify(names="hh_bbtt_c4_10", effectiveLumi=el) +
+                #specify(names="hh_bbtt_c4_20", effectiveLumi=el) +
                 []
                 )
 
