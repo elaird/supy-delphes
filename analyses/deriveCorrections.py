@@ -59,6 +59,7 @@ class deriveCorrections(supy.analysis):
         listOfCalculables += supy.calculables.zeroArgs(calculables)
         listOfCalculables += [calculables.HT(),
                               calculables.rho(),
+                              calculables.jecFactor("conf0_b_v3"),
                               calculables.Filtered(pids=[23], label="Z", status=[3]),
                               calculables.Filtered(pids=[25], label="h", status=[3]),
                               ]
@@ -109,9 +110,6 @@ class deriveCorrections(supy.analysis):
         from supy.samples import specify
         w = calculables.GenWeight()
 
-        rho0 = calculables.window("rho", max=80.)
-        rho1 = calculables.window("rho", min=90., max=100.)
-        rho2 = calculables.window("rho", min=110.)
         #n = 10000
         return (#specify(names="H_0_3_c0_pu0",    weights=w, color=r.kBlack, nEventsMax=n) +
                 #specify(names="H_0_3_c0_pu140",  weights=w, color=r.kBlack, nEventsMax=n) +
@@ -124,17 +122,9 @@ class deriveCorrections(supy.analysis):
                 ##specify(names="BB_13_21", weights=w, color=r.kBlue, nEventsMax=n) +
                 ###specify(names="BB_21_1k", weights=w, color=r.kBlue, effectiveLumi=2/fb) +
                 
-                specify(names="hh_bbtt_c4_10",         color=r.kRed, effectiveLumi=20000/fb) +
-
-                #specify(names="hh_bbtt", weights=bb, color=r.kRed, effectiveLumi=20000/fb) +
-                #specify(names="hh_bbtt", weights=be, color=r.kRed, effectiveLumi=20000/fb) +
-                #specify(names="hh_bbtt", weights=ee, color=r.kRed, effectiveLumi=20000/fb) +
-
-                #specify(names="hh_bbtt_c3_pu140", color=r.kRed, effectiveLumi=20000/fb) +
-                #specify(names="hh_bbtt_c4_pu140", color=r.kGreen, effectiveLumi=20000/fb) +
-                #specify(names="hh_bbtt_c4_pu140", weights=[rho0], color=r.kBlack, effectiveLumi=20000/fb) +
-                #specify(names="hh_bbtt_c4_pu140", weights=[rho1], color=r.kRed, effectiveLumi=20000/fb) +
-                #specify(names="hh_bbtt_c4_pu140", weights=[rho2], color=r.kBlue, effectiveLumi=20000/fb) +
+                specify(names="hh_bbtt_c0_pu0", color=r.kRed) +
+                #specify(names="hh_bbtt_c3_pu140", color=r.kRed) +
+                #specify(names="hh_bbtt_c4_pu140", color=r.kGreen) +
                 []
                 )
 
@@ -195,7 +185,7 @@ class deriveCorrections(supy.analysis):
                      rowColors=[r.kBlack, r.kViolet+4],
 
                      doLog=False,
-                     fitFunc=self.profFit_b_v2,
+                     fitFunc=self.profFit_b_v3,
                      showStatBox=True,
                      optStat=1100,
                      ).plotAll()
@@ -306,6 +296,58 @@ class deriveCorrections(supy.analysis):
             func = r.TF1("func", "[0]", 10.0, 80.0)
 
         histo.Fit(name, "lrq", "sames")
+        histo.GetFunction(name).SetLineWidth(1)
+        histo.GetFunction(name).SetLineColor(1+histo.GetLineColor())
+
+        s = xtitle.replace("uc.jet pT  (", "")
+        s = s.replace(")", "")
+        s = s.replace("|jet #", "abs(")
+        s = s.replace("|", ")")
+        s = s.replace("#leq", "<=")
+
+        self.fitText2 += ["if %s:" % s,
+                          "    return f%d" % self.iFunc]
+        f = histo.GetFunction(name)
+        self.fitText1.append('f%d = r.TF1("f%d", "%s", %g, %g)' % (self.iFunc,
+                                                                   self.iFunc,
+                                                                   f.GetExpFormula("p"),
+                                                                   f.GetXmin(),
+                                                                   f.GetXmax())
+                             )
+        return func
+
+
+    def profFit_b_v3(self, histo):
+        if type(histo) is not r.TProfile:
+            return
+
+        if not hasattr(self, "iFunc"):
+            self.iFunc = 0
+            self.fitText1 = []
+            self.fitText2 = []
+        else :
+            self.iFunc += 1
+
+        r.gStyle.SetOptFit(1111)
+        name = "func"
+        min = 20.0
+        max = 200.0
+        x = 70.0
+        xtitle = histo.GetXaxis().GetTitle()
+
+        if ("3.0" in xtitle) and ("4.0" in xtitle):
+            max = 160.0
+
+        s = "[0]"
+        s += " + (x <= %g)*([1]*(x-%g) + [2]*(x-%g)**2)" % (x, x, x)
+        s += " + (x  > %g)*([3]*(x-%g) + [4]*(x-%g)**2)" % (x, x, x)
+        func = r.TF1(name, s, min, max)
+        func.SetParameters(1.0, 0.0, 0.0, 0.0, 0.0)
+
+        if ("4.0" in xtitle) and not ("3.0" in xtitle):
+            func = r.TF1("func", "[0]", 20.0, 80.0)
+
+        histo.Fit(name, "rq", "sames")
         histo.GetFunction(name).SetLineWidth(1)
         histo.GetFunction(name).SetLineColor(1+histo.GetLineColor())
 
