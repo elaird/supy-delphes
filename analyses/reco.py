@@ -22,8 +22,9 @@ class reco(supy.analysis):
                 supy.steps.histos.multiplicity("tauTagged_Jets"),
                 supy.steps.filters.multiplicity("tauTagged_Jets", min=2, max=2),
                 supy.steps.histos.value("HT", 50, 0.0, 2500.0),
-                supy.steps.histos.multiplicity("Duplicates_bTagged_Jets_mask1_tauTagged_Jets"),
-                supy.steps.filters.multiplicity("Duplicates_bTagged_Jets_mask1_tauTagged_Jets", max=0),
+
+                supy.steps.histos.multiplicity("tauTagged_bTagged_Jets_mask1"),
+                supy.steps.filters.multiplicity("tauTagged_bTagged_Jets_mask1", max=0),
 
                 #supy.steps.histos.mass("bTagged_Jets_mask1_SumP4",              50, 0.0, 250.0),
                 #supy.steps.histos.mass("JetsFixedMass_bTagged_SumP4",           50, 0.0, 250.0),
@@ -67,6 +68,7 @@ class reco(supy.analysis):
                               calculables.Filtered(label="", ptMin=20.0, absEtaMax=2.4, key="Jet"),
                               calculables.bTagged("Jets", mask=0x1),
                               calculables.tauTagged("Jets"),
+                              calculables.tauTagged("bTagged_Jets_mask1"),
                               calculables.Duplicates(key1="bTagged_Jets_mask1", key2="tauTagged_Jets", minDR=0.2),
                               calculables.DeltaR("bTagged_Jets_mask1"),
                               calculables.DeltaR("tauTagged_Jets"),
