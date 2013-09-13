@@ -42,6 +42,8 @@ h.add("hh_bbtt_c4_20",    l("HHToBBTT_14TeV",           confOverride="/PhaseII/C
 hhSkim = 'utils.fileListFromDisk(location="%s/PhaseII/Configuration4/140PileUp/hh_skim_v2/%s/")' % (skimDir, '%s')
 h.add("hh_bbtt_c4_10_skim", hhSkim % '10GeV', xs=9.439792e-03 * 2.500000e-03)
 h.add("hh_bbtt_c4_20_skim", hhSkim % '20GeV', xs=5.575478e-03 * 2.500000e-03)
+hhSkim = 'utils.fileListFromDisk(location="%s/PhaseI/Configuration0/NoPileUp/hh_skim_v2/%s/")' % (skimDir, '%s')
+h.add("hh_bbtt_c0_pu0_skim",hhSkim % '20GeV', xs=2.114810e-02 * 2.500000e-03)
 
 h.add("B",         l("B-4p-0-1-v1510_14TEV"),          xs=200944.*pb)
 
