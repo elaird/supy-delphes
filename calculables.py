@@ -9,6 +9,7 @@ import jec
 class jecFactor(supy.wrappedChain.calculable):
     def __init__(self, file=""):
         self.f = getattr(jec, file).f
+        self.moreName = file
 
     def corr(self, pt, eta):
         func = self.f(eta)
