@@ -25,7 +25,7 @@ class skim_batch(supy.analysis):
         listOfCalculables += [calculables.HT(),
                               calculables.rho(),
                               calculables.Filtered(pids=[-15, 15], label="tau", status=[3]),
-                              calculables.Filtered(label="", ptMin=10.0, absEtaMax=2.4, key="Jet"),
+                              calculables.Filtered(label="", ptMin=20.0, absEtaMax=2.4, key="Jet"),
                               calculables.bTagged("Jets", mask=0x1),
                               calculables.tauTagged("Jets"),
                               ]
@@ -45,6 +45,7 @@ class skim_batch(supy.analysis):
                 specify(names="tt_11_17", weights=w) +
                 specify(names="tt_17_25", weights=w) +
                 specify(names="tt_25_1k", weights=w) +
+                #specify(names="hh_bbtt_c0_pu0") +
                 []
                 )
 
