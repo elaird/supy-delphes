@@ -6,6 +6,27 @@ import ROOT as r
 import supy
 import jec
 
+class jecFactor(supy.wrappedChain.calculable):
+    def __init__(self, file=""):
+        self.f = getattr(jec, file).f
+
+    def corr(self, pt, eta):
+        func = self.f(eta)
+        if not func:
+            return 1.0
+        xMax = func.GetXmax()
+        xMin = func.GetXmin()
+        x = pt
+        if xMax < x:
+            x = xMax
+        if x < xMin:
+            x = xMin
+        v = func.Eval(x)
+        return 1.0 if not v else 1.0/v
+
+    def update(self, _):
+        self.value = self.corr
+
 
 class GenWeight(supy.wrappedChain.calculable):
     def update(self, _):
@@ -225,7 +246,7 @@ class JetsFixedMass(supy.wrappedChain.calculable):
             pt = jets[i].PT
             eta = jets[i].Eta
             if self.correctPt:
-                pt *= jec.factor(pt, eta)
+                pt *= self.source["jecFactor"](pt, eta)
             self.lv[i].SetCoordinates(pt, eta, jets[i].Phi, self.m)
         self.value = self.lv
 
