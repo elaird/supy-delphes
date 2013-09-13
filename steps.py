@@ -3,7 +3,7 @@ from displayer import displayer
 import utils
 import ROOT as r
 from supy import analysisStep
-import jec
+
 
 class matchPtHistogrammer(analysisStep):
     def __init__(self, sourceKey="", etas=[], correctPtAxis=False, correctRatio=False, useJetEta=True):
@@ -66,7 +66,7 @@ class matchPtHistogrammer(analysisStep):
         for particle, jet in eventVars[self.sourceKey].iteritems():
             jetPt = jet.PT
             ratio = jet.PT / particle.PT
-            factor = jec.factor(jetPt, jet.Eta)
+            factor = eventVars["jecFactor"](jetPt, jet.Eta)
             if self.correctPtAxis:
                 jetPt *= factor
             if self.correctRatio:
