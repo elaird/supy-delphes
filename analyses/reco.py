@@ -6,6 +6,12 @@ from units import fb, mb, mtau
 import ROOT as r
 
 class reco(supy.analysis):
+    def parameters(self):
+        return {"jec": self.vary({"c0_pu0": "conf0_b_v3",
+                                  "c4_pu140": "conf4_b_v2",
+                                  }),
+                }
+
     def listOfSteps(self, pars):
         return [supy.steps.printer.progressPrinter(),
                 supy.steps.histos.value("HT", 50, 0.0, 2500.0),
@@ -55,9 +61,10 @@ class reco(supy.analysis):
         listOfCalculables += supy.calculables.zeroArgs(calculables)
         listOfCalculables += [calculables.HT(),
                               calculables.rho(),
+                              calculables.jecFactor(pars["jec"]),
                               calculables.Filtered(pids=[-5, 5], label="b", status=[3]),
                               calculables.Filtered(pids=[-15, 15], label="tau", status=[3]),
-                              calculables.Filtered(label="", ptMin=10.0, absEtaMax=2.4, key="Jet"),
+                              calculables.Filtered(label="", ptMin=20.0, absEtaMax=2.4, key="Jet"),
                               calculables.bTagged("Jets", mask=0x1),
                               calculables.tauTagged("Jets"),
                               calculables.Duplicates(key1="bTagged_Jets_mask1", key2="tauTagged_Jets", minDR=0.2),
@@ -94,14 +101,15 @@ class reco(supy.analysis):
         from supy.samples import specify
         w = calculables.GenWeight()
 
+        c = pars["tag"]
         el = 1e5/fb
-        return (specify(names="tt_c4_0_6_skim",   weights=w, effectiveLumi=el) +
-                specify(names="tt_c4_6_11_skim",  weights=w, effectiveLumi=el) +
-                specify(names="tt_c4_11_17_skim", weights=w, effectiveLumi=el) +
-                specify(names="tt_c4_17_25_skim", weights=w, effectiveLumi=el) +
-                specify(names="tt_c4_25_1k_skim", weights=w, effectiveLumi=el) +
-                #specify(names="hh_bbtt_c4_10_skim") +
-                specify(names="hh_bbtt_c4_20_skim") +
+        return (specify(names="tt_%s_0_6_skim" % c,   weights=w, effectiveLumi=el) +
+                specify(names="tt_%s_6_11_skim" % c,  weights=w, effectiveLumi=el) +
+                specify(names="tt_%s_11_17_skim" % c, weights=w, effectiveLumi=el) +
+                specify(names="tt_%s_17_25_skim" % c, weights=w, effectiveLumi=el) +
+                specify(names="tt_%s_25_1k_skim" % c, weights=w, effectiveLumi=el) +
+                #specify(names="hh_bbtt_%s_10_skim" % c) +
+                specify(names="hh_bbtt_%s_20_skim" % c) +
 
                 #specify(names="tt_0_6",   weights=w) + #, nEventsMax=n) +
                 #specify(names="tt_6_11",  weights=w) + #, nEventsMax=n) +
@@ -130,14 +138,14 @@ class reco(supy.analysis):
         #org.mergeSamples(targetSpec=gopts("hh_bbtt_c4_10", r.kRed), sources=["hh_bbtt_c4_10"])
         #org.mergeSamples(targetSpec=gopts("hh_bbtt", r.kRed), sources=["hh_bbtt_c4_20"])
 
+        c = pars["tag"]
+        org.mergeSamples(targetSpec=gopts("tt_0_6",   r.kBlue),    sources=["tt_%s_0_6_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("tt_6_11",  r.kGreen),   sources=["tt_%s_6_11_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("tt_11_17", r.kCyan),    sources=["tt_%s_11_17_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("tt_17_25", r.kMagenta), sources=["tt_%s_17_25_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("tt_25_1k", r.kOrange),  sources=["tt_%s_25_1k_skim.GenWeight" % c])
 
-        org.mergeSamples(targetSpec=gopts("tt_0_6",   r.kBlue),    sources=["tt_c4_0_6_skim.GenWeight"])
-        org.mergeSamples(targetSpec=gopts("tt_6_11",  r.kGreen),   sources=["tt_c4_6_11_skim.GenWeight"])
-        org.mergeSamples(targetSpec=gopts("tt_11_17", r.kCyan),    sources=["tt_c4_11_17_skim.GenWeight"])
-        org.mergeSamples(targetSpec=gopts("tt_17_25", r.kMagenta), sources=["tt_c4_17_25_skim.GenWeight"])
-        org.mergeSamples(targetSpec=gopts("tt_25_1k", r.kOrange),  sources=["tt_c4_25_1k_skim.GenWeight"])
-
-        org.mergeSamples(targetSpec=gopts("hh_bb#tau#tau", r.kRed), sources=["hh_bbtt_c4_20_skim"])
+        org.mergeSamples(targetSpec=gopts("hh_bb#tau#tau", r.kRed), sources=["hh_bbtt_%s_20_skim" % c])
         
         org.mergeSamples(targetSpec=gopts("tt", r.kBlack), allWithPrefix="tt_", keepSources=True)
 
