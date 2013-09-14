@@ -121,8 +121,8 @@ class deriveCorrections(supy.analysis):
                 ##specify(names="BB_7_13",  weights=w, color=r.kBlue, nEventsMax=n) +
                 ##specify(names="BB_13_21", weights=w, color=r.kBlue, nEventsMax=n) +
                 ###specify(names="BB_21_1k", weights=w, color=r.kBlue, effectiveLumi=2/fb) +
-                
-                specify(names="hh_bbtt_c0_pu0", color=r.kRed) +
+
+                specify(names="hh_bbtt_c0_pu0_20", color=r.kRed) +
                 #specify(names="hh_bbtt_c3_pu140", color=r.kRed) +
                 #specify(names="hh_bbtt_c4_pu140", color=r.kGreen) +
                 []
@@ -185,7 +185,7 @@ class deriveCorrections(supy.analysis):
                      rowColors=[r.kBlack, r.kViolet+4],
 
                      doLog=False,
-                     fitFunc=self.profFit_b_v3,
+                     fitFunc=lambda x: self.profFit(x, "b_v3"),
                      showStatBox=True,
                      optStat=1100,
                      ).plotAll()
@@ -193,21 +193,50 @@ class deriveCorrections(supy.analysis):
         self.dumpFitResults(fileName="fitResults.py")
 
 
-    def profFit_b_v1(self, histo, dump=False):
-        assert False
+    def profFit(self, histo, version=""):
         if type(histo) is not r.TProfile:
             return
 
+        assert version
+
         if not hasattr(self, "iFunc"):
             self.iFunc = 0
+            self.fitText1 = []
+            self.fitText2 = []
         else :
             self.iFunc += 1
 
         r.gStyle.SetOptFit(1111)
-        name = "func"
-        min = 20.0
-        max = 200.0
-        x = 70.0
+
+        go = getattr(self, version)
+        f = go(histo=histo)
+        if not f:
+            return
+
+        histo.Fit(f.GetName(), "rq", "sames")
+        f.SetLineWidth(1)
+        f.SetLineColor(1 + histo.GetLineColor())
+
+        xtitle = histo.GetXaxis().GetTitle()
+        s = xtitle.replace("uc.jet pT  (", "")
+        s = s.replace(")", "")
+        s = s.replace("|jet #", "abs(")
+        s = s.replace("|", ")")
+        s = s.replace("#leq", "<=")
+
+        self.fitText2 += ["if %s:" % s,
+                          "    return f%d" % self.iFunc]
+
+        self.fitText1.append('f%d = r.TF1("f%d", "%s", %g, %g)' % (self.iFunc,
+                                                                   self.iFunc,
+                                                                   f.GetExpFormula("p"),
+                                                                   f.GetXmin(),
+                                                                   f.GetXmax())
+                             )
+        return f
+
+
+    def b_v1(self, histo=None, min=20.0, max=200.0, x=70.0):
         xtitle = histo.GetXaxis().GetTitle()
         if ("0.9" in xtitle) and ("1.2" in xtitle):
             x = 90.0
@@ -225,41 +254,10 @@ class deriveCorrections(supy.analysis):
         s += " + (x > %g)*([3] + [4]*x + [5]*x*x)" % x
         func = r.TF1(name, s, min, max)
         func.SetParameters(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
-
-        histo.Fit(name, "lrq", "sames")
-        histo.GetFunction(name).SetLineWidth(1)
-        histo.GetFunction(name).SetLineColor(1+histo.GetLineColor())
-        if dump:
-            s = xtitle.replace("jet pT  (", "")
-            s = s.replace(")", "")
-            s = s.replace("|#", "abs(")
-            s = s.replace("|", ")")
-            print "if %s:" % s
-            print "    return f%d" % self.iFunc
-
-            f = histo.GetFunction(name)
-            print 'f%d = r.TF1("f%d", "%s", %g, %g)' % (self.iFunc, self.iFunc,
-                                                        f.GetExpFormula("p"),
-                                                        f.GetXmin(), f.GetXmax())
         return func
 
 
-    def profFit_b_v2(self, histo):
-        if type(histo) is not r.TProfile:
-            return
-
-        if not hasattr(self, "iFunc"):
-            self.iFunc = 0
-            self.fitText1 = []
-            self.fitText2 = []
-        else :
-            self.iFunc += 1
-
-        r.gStyle.SetOptFit(1111)
-        name = "func"
-        min = 10.0
-        max = 200.0
-        x = 70.0
+    def b_v2(self, histo=None, min=10.0, max=200.0, x=70.0):
         xtitle = histo.GetXaxis().GetTitle()
         if ("0.3" in xtitle) and ("0.6" not in xtitle):
             x = 80.0
@@ -289,50 +287,16 @@ class deriveCorrections(supy.analysis):
         s = "[0]"
         s += " + (x <= %g)*([1]*(x-%g) + [2]*(x-%g)**2)" % (x, x, x)
         s += " + (x  > %g)*([3]*(x-%g) + [4]*(x-%g)**2)" % (x, x, x)
+        name = "func"
         func = r.TF1(name, s, min, max)
         func.SetParameters(1.0, 0.0, 0.0, 0.0, 0.0)
 
         if ("4.0" in xtitle) and not ("3.0" in xtitle):
             func = r.TF1("func", "[0]", 10.0, 80.0)
-
-        histo.Fit(name, "lrq", "sames")
-        histo.GetFunction(name).SetLineWidth(1)
-        histo.GetFunction(name).SetLineColor(1+histo.GetLineColor())
-
-        s = xtitle.replace("uc.jet pT  (", "")
-        s = s.replace(")", "")
-        s = s.replace("|jet #", "abs(")
-        s = s.replace("|", ")")
-        s = s.replace("#leq", "<=")
-
-        self.fitText2 += ["if %s:" % s,
-                          "    return f%d" % self.iFunc]
-        f = histo.GetFunction(name)
-        self.fitText1.append('f%d = r.TF1("f%d", "%s", %g, %g)' % (self.iFunc,
-                                                                   self.iFunc,
-                                                                   f.GetExpFormula("p"),
-                                                                   f.GetXmin(),
-                                                                   f.GetXmax())
-                             )
         return func
 
 
-    def profFit_b_v3(self, histo):
-        if type(histo) is not r.TProfile:
-            return
-
-        if not hasattr(self, "iFunc"):
-            self.iFunc = 0
-            self.fitText1 = []
-            self.fitText2 = []
-        else :
-            self.iFunc += 1
-
-        r.gStyle.SetOptFit(1111)
-        name = "func"
-        min = 20.0
-        max = 200.0
-        x = 70.0
+    def b_v3(self, histo=None, min=20.0, max=200.0, x=70.0):
         xtitle = histo.GetXaxis().GetTitle()
 
         if ("3.0" in xtitle) and ("4.0" in xtitle):
@@ -341,50 +305,16 @@ class deriveCorrections(supy.analysis):
         s = "[0]"
         s += " + (x <= %g)*([1]*(x-%g) + [2]*(x-%g)**2)" % (x, x, x)
         s += " + (x  > %g)*([3]*(x-%g) + [4]*(x-%g)**2)" % (x, x, x)
+        name = "func"
         func = r.TF1(name, s, min, max)
         func.SetParameters(1.0, 0.0, 0.0, 0.0, 0.0)
 
         if ("4.0" in xtitle) and not ("3.0" in xtitle):
-            func = r.TF1("func", "[0]", 20.0, 80.0)
-
-        histo.Fit(name, "rq", "sames")
-        histo.GetFunction(name).SetLineWidth(1)
-        histo.GetFunction(name).SetLineColor(1+histo.GetLineColor())
-
-        s = xtitle.replace("uc.jet pT  (", "")
-        s = s.replace(")", "")
-        s = s.replace("|jet #", "abs(")
-        s = s.replace("|", ")")
-        s = s.replace("#leq", "<=")
-
-        self.fitText2 += ["if %s:" % s,
-                          "    return f%d" % self.iFunc]
-        f = histo.GetFunction(name)
-        self.fitText1.append('f%d = r.TF1("f%d", "%s", %g, %g)' % (self.iFunc,
-                                                                   self.iFunc,
-                                                                   f.GetExpFormula("p"),
-                                                                   f.GetXmin(),
-                                                                   f.GetXmax())
-                             )
+            func = r.TF1(name, "[0]", 20.0, 80.0)
         return func
 
 
-    def profFit_tau_v2(self, histo):
-        if type(histo) is not r.TProfile:
-            return
-
-        if not hasattr(self, "iFunc"):
-            self.iFunc = 0
-            self.fitText1 = []
-            self.fitText2 = []
-        else :
-            self.iFunc += 1
-
-        r.gStyle.SetOptFit(1111)
-        name = "func"
-        min = 10.0
-        max = 120.0
-        x = 60.0
+    def tau_v2(self, histo=None, min=10.0, max=120.0, x=60.0):
         xtitle = histo.GetXaxis().GetTitle()
         if ("0.3" in xtitle) and ("0.6" not in xtitle):
             x = 70.0
@@ -413,31 +343,11 @@ class deriveCorrections(supy.analysis):
         s = "[0]"
         s += " + (x <= %g)*([1]*(x-%g) + [2]*(x-%g)**2)" % (x, x, x)
         s += " + (x  > %g)*([3]*(x-%g) + [4]*(x-%g)**2)" % (x, x, x)
+        name = "func"
         func = r.TF1(name, s, min, max)
         func.SetParameters(1.0, 0.0, 0.0, 0.0, 0.0)
 
         #if ("4.0" in xtitle) and not ("3.0" in xtitle):
-        #    func = r.TF1("func", "1.0", 10.0, 80.0)
-
-        histo.Fit(name, "lrq", "sames")
-        histo.GetFunction(name).SetLineWidth(1)
-        histo.GetFunction(name).SetLineColor(1+histo.GetLineColor())
-
-        s = xtitle.replace("uc.jet pT  (", "")
-        s = s.replace(")", "")
-        s = s.replace("|jet #", "abs(")
-        s = s.replace("|", ")")
-        s = s.replace("#leq", "<=")
-
-        self.fitText2 += ["if %s:" % s,
-                          "    return f%d" % self.iFunc]
-        f = histo.GetFunction(name)
-        self.fitText1.append('f%d = r.TF1("f%d", "%s", %g, %g)' % (self.iFunc,
-                                                                   self.iFunc,
-                                                                   f.GetExpFormula("p"),
-                                                                   f.GetXmin(),
-                                                                   f.GetXmax())
-                             )
+        #    func = r.TF1(name, "1.0", 10.0, 80.0)
         return func
-
 
