@@ -66,7 +66,8 @@ class matchPtHistogrammer(analysisStep):
         for particle, jet in eventVars[self.sourceKey].iteritems():
             jetPt = jet.PT
             ratio = jet.PT / particle.PT
-            factor = eventVars["jecFactor"](jetPt, jet.Eta)
+            if self.correctPtAxis or  self.correctRatio:
+                factor = eventVars["jecFactor"](jetPt, jet.Eta)
             if self.correctPtAxis:
                 jetPt *= factor
             if self.correctRatio:
