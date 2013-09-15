@@ -27,6 +27,8 @@ skimDir = "/afs/cern.ch/work/e/elaird/delphes/"
 
 h = supy.samples.SampleHolder()
 
+h.add("QCD_c4_pu140_Pt_0p3_4", l("QCD_14TeV", skip=["_Phase_I_"], confOverride="/PhaseI/Configuration0/140PileUp/"), xs=4*pb)  # fake xs
+
 h.add("tt_0_6_pu0",   l("tt-4p-0-600-v1510_14TEV", confOverride="NoPileUp/"),  xs=530.89358*pb)
 h.add("tt_0_6_pu50",  l("tt-4p-0-600-v1510_14TEV", confOverride="50PileUp/"),  xs=530.89358*pb)
 h.add("tt_0_6_pu140", l("tt-4p-0-600-v1510_14TEV", confOverride="140PileUp/"), xs=530.89358*pb)
