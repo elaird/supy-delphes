@@ -108,7 +108,8 @@ class Filtered(supy.wrappedChain.calculable):
     def name(self):
         return "%s%ss" % (self.label, self.key)
 
-    def __init__(self, pids=[], status=[], label="", ptMin=None, absEtaMax=None, key="Particle", ptSort=False, pt="PT"):
+    def __init__(self, pids=[], status=[], label="", ptMin=None, absEtaMax=None, key="", ptSort=False, pt="PT"):
+        assert key
         for item in ["pids", "status", "label", "ptMin", "absEtaMax", "key", "ptSort", "pt"]:
             setattr(self, item, eval(item))
 
@@ -174,10 +175,10 @@ class tauTagged(supy.wrappedChain.calculable):
 class JetMatchedTo(supy.wrappedChain.calculable):
     @property
     def name(self):
-        return "JetMatchedTo_%s%s" % (self.sourceKey, "_noMaxDR" if not self.maxDR else "")
+        return "%sMatchedTo_%s%s" % (self.jetKey, self.sourceKey, "_noMaxDR" if not self.maxDR else "")
 
-    def __init__(self, sourceKey="", minPt=None, maxDR=None):
-        for item in ["sourceKey", "minPt", "maxDR"]:
+    def __init__(self, sourceKey="", minPt=None, maxDR=None, jetKey="Jet"):
+        for item in ["sourceKey", "minPt", "maxDR", "jetKey"]:
             setattr(self, item, eval(item))
 
     def update(self, _):
@@ -186,7 +187,7 @@ class JetMatchedTo(supy.wrappedChain.calculable):
             if self.minPt and particle.PT < self.minPt:
                 continue
             dR = []
-            for jet in self.source["Jet"]:
+            for jet in self.source[self.jetKey]:
                 dr = utils.deltaR(particle, jet)
                 if self.maxDR and self.maxDR < dr:
                     continue
