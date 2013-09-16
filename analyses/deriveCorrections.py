@@ -13,21 +13,21 @@ class deriveCorrections(supy.analysis):
                 #supy.steps.histos.value("HT", 300, 0.0, 3000.0),
                 supy.steps.filters.multiplicity("%sParticles" % p, min=2, max=2),
                 supy.steps.histos.mass("%sParticles_SumP4" % p, 50, 0.0, 250.0),
-                #steps.iterHistogrammer(var="bParticles", attr="PT", func=False, nBins=30, xMin=0.0, xMax=300.0),
+                steps.iterHistogrammer(var="bParticles", attr="PT", func=False, nBins=30, xMin=0.0, xMax=300.0),
 
                 steps.matchDRHistogrammer("JetMatchedTo_%sParticles_noMaxDR" % p),
 
                 supy.steps.histos.multiplicity("JetMatchedTo_%sParticles" % p),
-                supy.steps.filters.multiplicity("JetMatchedTo_%sParticles" % p, min=2, max=2),
-                supy.steps.histos.value("DeltaR_JetMatchedTo_%sParticles.values" % p, 100, 0.0, 10.0),
-                supy.steps.filters.value("DeltaR_JetMatchedTo_%sParticles.values" % p, min=0.2),
+                supy.steps.filters.multiplicity("JetMatchedTo_%sParticles" % p, max=2),
+                #supy.steps.histos.value("DeltaR_JetMatchedTo_%sParticles.values" % p, 100, 0.0, 10.0),
+                #supy.steps.filters.value("DeltaR_JetMatchedTo_%sParticles.values" % p, min=0.2),
 
-                supy.steps.histos.mass("JetMatchedTo_%sParticles.values_SumP4" % p,   50, 0.0, 250.0),
-                supy.steps.histos.mass("JetsFixedMass_%sMatched_SumP4" % p,           50, 0.0, 250.0),
-                supy.steps.histos.mass("JetsFixedMass_%sMatched_Corrected_SumP4" % p, 50, 0.0, 250.0),
+                #supy.steps.histos.mass("JetMatchedTo_%sParticles.values_SumP4" % p,   50, 0.0, 250.0),
+                #supy.steps.histos.mass("JetsFixedMass_%sMatched_SumP4" % p,           50, 0.0, 250.0),
+                #supy.steps.histos.mass("JetsFixedMass_%sMatched_Corrected_SumP4" % p, 50, 0.0, 250.0),
 
-                steps.iterHistogrammer(var="JetsFixedMass_%sMatched" % p, attr="pt", func=True,
-                                       labelIndex=False, nBins=20, xMin=0.0, xMax=200.0),
+                #steps.iterHistogrammer(var="JetsFixedMass_%sMatched" % p, attr="pt", func=True,
+                #                       labelIndex=False, nBins=20, xMin=0.0, xMax=200.0),
 
                 supy.steps.filters.label("uncorrected"),
                 steps.matchDRHistogrammer("JetMatchedTo_%sParticles" % p),
@@ -59,12 +59,12 @@ class deriveCorrections(supy.analysis):
         listOfCalculables += supy.calculables.zeroArgs(calculables)
         listOfCalculables += [calculables.HT(),
                               calculables.rho(),
-                              calculables.jecFactor("conf0_b_v3"),
-                              calculables.Filtered(pids=[23], label="Z", status=[3]),
-                              calculables.Filtered(pids=[25], label="h", status=[3]),
+                              #calculables.jecFactor("conf0_b_v3"),
+                              calculables.Filtered(pids=[23], label="Z", key="Particle", status=[3]),
+                              calculables.Filtered(pids=[25], label="h", key="Particle", status=[3]),
                               ]
         listOfCalculables += [# b
-                              calculables.Filtered(pids=[-5, 5], label="b", status=[3]),
+                              calculables.Filtered(pids=[-5, 5], label="b", status=[3], key="Particle", ptMin=0.0),
                               calculables.JetMatchedTo(sourceKey="bParticles"),
                               calculables.JetMatchedTo(sourceKey="bParticles", maxDR=0.3),
                               calculables.SumP4("bParticles"),
@@ -81,7 +81,7 @@ class deriveCorrections(supy.analysis):
                               ]
 
         listOfCalculables += [# tau
-                              calculables.Filtered(pids=[-15, 15], label="tau", status=[3]),
+                              calculables.Filtered(pids=[-15, 15], label="tau", key="Particle", status=[3]),
                               calculables.JetMatchedTo(sourceKey="tauParticles"),
                               calculables.JetMatchedTo(sourceKey="tauParticles", maxDR=0.3),
                               calculables.SumP4("tauParticles"),
@@ -122,9 +122,11 @@ class deriveCorrections(supy.analysis):
                 ##specify(names="BB_13_21", weights=w, color=r.kBlue, nEventsMax=n) +
                 ###specify(names="BB_21_1k", weights=w, color=r.kBlue, effectiveLumi=2/fb) +
 
-                specify(names="hh_bbtt_c0_pu0_20", color=r.kRed) +
+                #specify(names="QCD_c4_pu140_Pt_0p3_4", nFilesMax=1) +
+                #specify(names="hh_bbtt_c0_pu0_20", color=r.kRed) +
                 #specify(names="hh_bbtt_c3_pu140", color=r.kRed) +
-                #specify(names="hh_bbtt_c4_pu140", color=r.kGreen) +
+                #specify(names="hh_bbtt_c4_pu140_10", color=r.kRed) +
+                specify(names="hh_bbtt_c4_pu140_20", color=r.kRed) +
                 []
                 )
 
@@ -164,15 +166,6 @@ class deriveCorrections(supy.analysis):
 
         #org.mergeSamples(targetSpec=gopts("hh_bbtt_c3_pu140", r.kRed),     sources=["hh_bbtt_c3_pu140"])
         #org.mergeSamples(targetSpec=gopts("hh_bbtt_c4_pu140", r.kMagenta), sources=["hh_bbtt_c4_pu140"])
-
-        org.mergeSamples(targetSpec=gopts("hh_bbtt_BB", r.kRed),     sources=["hh_bbtt.BB.le.JetsCategory.le.BB"])
-        org.mergeSamples(targetSpec=gopts("hh_bbtt_BE", r.kMagenta), sources=["hh_bbtt.BE.le.JetsCategory.le.BE"])
-        org.mergeSamples(targetSpec=gopts("hh_bbtt_EE", r.kCyan),    sources=["hh_bbtt.EE.le.JetsCategory.le.EE"])
-
-        #org.mergeSamples(targetSpec=gopts("hh_bbtt_c4_pu140",    r.kGreen), sources=["hh_bbtt_c4_pu140"])
-        #org.mergeSamples(targetSpec=gopts("rho<80",     r.kBlack), sources=["hh_bbtt_c4_pu140.rho.le.80"])
-        #org.mergeSamples(targetSpec=gopts("90<rho<100", r.kRed),   sources=["hh_bbtt_c4_pu140.90.le.rho.le.100"])
-        #org.mergeSamples(targetSpec=gopts("110<rho",    r.kBlue),  sources=["hh_bbtt_c4_pu140.110.le.rho"])
 
         org.scale(1.0/fb)
         #org.scale(toPdf=True)
@@ -310,7 +303,7 @@ class deriveCorrections(supy.analysis):
         func.SetParameters(1.0, 0.0, 0.0, 0.0, 0.0)
 
         if ("4.0" in xtitle) and not ("3.0" in xtitle):
-            func = r.TF1(name, "[0]", 20.0, 80.0)
+            func = r.TF1(name, "[0]", min, 80.0)
         return func
 
 
