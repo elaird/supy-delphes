@@ -292,3 +292,15 @@ class jdj(supy.wrappedChain.calculable):
         jets = self.source[self.jets]
         assert (len(jets) == 2) and all(jets), jets
         self.value = math.sqrt(2.0*supy.utils.Dot(*jets))
+
+
+class minPt(supy.wrappedChain.calculable):
+    @property
+    def name(self):
+        return "%s_minPt" % self.key
+    def __init__(self, key):
+        self.key = key
+
+    def update(self, _):
+        values = [x.PT for x in self.source[self.key]]
+        self.value = min(values) if values else None
