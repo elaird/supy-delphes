@@ -6,44 +6,53 @@ from units import fb, mb, mtau
 import ROOT as r
 
 class deriveCorrections(supy.analysis):
-    def listOfSteps(self, _):
+    def parameters(self):
+        return {"2matches": True,
+                "checkJec": "conf4_b_bPtMin0_012matches",
+                }
+
+    def listOfSteps(self, params):
         p = "b"
-        return [supy.steps.printer.progressPrinter(),
+        out = []
+        out += [supy.steps.printer.progressPrinter(),
                 ##supy.steps.histos.value("rho", 30, 0.0, 150.0),
                 #supy.steps.histos.value("HT", 300, 0.0, 3000.0),
                 supy.steps.filters.multiplicity("%sParticles" % p, min=2, max=2),
                 supy.steps.histos.mass("%sParticles_SumP4" % p, 50, 0.0, 250.0),
                 steps.iterHistogrammer(var="bParticles", attr="PT", func=False, nBins=30, xMin=0.0, xMax=300.0),
-
                 steps.matchDRHistogrammer("JetMatchedTo_%sParticles_noMaxDR" % p),
-
                 supy.steps.histos.multiplicity("JetMatchedTo_%sParticles" % p),
                 supy.steps.filters.multiplicity("JetMatchedTo_%sParticles" % p, max=2),
-                #supy.steps.histos.value("DeltaR_JetMatchedTo_%sParticles.values" % p, 100, 0.0, 10.0),
-                #supy.steps.filters.value("DeltaR_JetMatchedTo_%sParticles.values" % p, min=0.2),
+                ]
 
-                #supy.steps.histos.mass("JetMatchedTo_%sParticles.values_SumP4" % p,   50, 0.0, 250.0),
-                #supy.steps.histos.mass("JetsFixedMass_%sMatched_SumP4" % p,           50, 0.0, 250.0),
-                #supy.steps.histos.mass("JetsFixedMass_%sMatched_Corrected_SumP4" % p, 50, 0.0, 250.0),
+        if params["2matches"]:
+            out += [supy.steps.filters.multiplicity("JetMatchedTo_%sParticles" % p, min=2, max=2),
+                    supy.steps.histos.value("DeltaR_JetMatchedTo_%sParticles.values" % p, 100, 0.0, 10.0),
+                    supy.steps.filters.value("DeltaR_JetMatchedTo_%sParticles.values" % p, min=0.2),
+                    supy.steps.histos.mass("JetsFixedMass_%sMatched_SumP4" % p, 50, 0.0, 250.0),
+                    ]
 
-                #steps.iterHistogrammer(var="JetsFixedMass_%sMatched" % p, attr="pt", func=True,
-                #                       labelIndex=False, nBins=20, xMin=0.0, xMax=200.0),
-
-                supy.steps.filters.label("uncorrected"),
+        out += [supy.steps.filters.label("uncorrected"),
                 steps.matchDRHistogrammer("JetMatchedTo_%sParticles" % p),
                 steps.matchPtHistogrammer("JetMatchedTo_%sParticles" % p,
                                           #etas=[0.6, 1.2, 1.8, 2.4, 3.0, 4.0],
                                           etas=[0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 4.0],
                                           correctPtAxis=False,
                                           correctRatio=False,
+                                          #plot2D=True,
                                           ),
-                #supy.steps.filters.label("corrected"),
-                #steps.matchPtHistogrammer("JetMatchedTo_%sParticles" % p,
-                #                          #etas=[0.6, 1.2, 1.8, 2.4, 3.0, 4.0],
-                #                          etas=[0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 4.0],
-                #                          correctPtAxis=False,
-                #                          correctRatio=True,
-                #                          ),
+                supy.steps.histos.mass("JetMatchedTo_%sParticles.values_SumP4" % p,   50, 0.0, 250.0),
+                ]
+
+        if params["checkJec"]:
+            out += [
+                supy.steps.filters.label("corrected"),
+                steps.matchPtHistogrammer("JetMatchedTo_%sParticles" % p,
+                                          #etas=[0.6, 1.2, 1.8, 2.4, 3.0, 4.0],
+                                          etas=[0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 4.0],
+                                          correctPtAxis=False,
+                                          correctRatio=True,
+                                          ),
                 #supy.steps.filters.label("corrected2"),
                 #steps.matchPtHistogrammer("JetMatchedTo_%sParticles" % p,
                 #                          #etas=[0.6, 1.2, 1.8, 2.4, 3.0, 4.0],
@@ -52,14 +61,22 @@ class deriveCorrections(supy.analysis):
                 #                          correctRatio=True,
                 #                          ),
                 ]
-
+            if params["2matches"]:
+                out += [supy.steps.histos.mass("JetsFixedMass_%sMatched_Corrected_SumP4" % p, 50, 0.0, 250.0),
+                        steps.iterHistogrammer(var="JetsFixedMass_%sMatched" % p, attr="pt", func=True,
+                                               labelIndex=False, nBins=20, xMin=0.0, xMax=200.0),
+                        steps.massHistogrammer(pts=[30.0, 60.0, 90.0]),
+                        ]
+        return out
 
     def listOfCalculables(self, pars):
         listOfCalculables = supy.calculables.zeroArgs(supy.calculables)
         listOfCalculables += supy.calculables.zeroArgs(calculables)
+        if pars["checkJec"]:
+            listOfCalculables.append(calculables.jecFactor(pars["checkJec"]))
+
         listOfCalculables += [calculables.HT(),
                               calculables.rho(),
-                              #calculables.jecFactor("conf0_b_v3"),
                               calculables.Filtered(pids=[23], label="Z", key="Particle", status=[3]),
                               calculables.Filtered(pids=[25], label="h", key="Particle", status=[3]),
                               ]
