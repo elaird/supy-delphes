@@ -30,8 +30,11 @@ def drawFuncs(iEta=None, eta=None, leg=None):
     return out
 
 
-def makePdf(pdf="compared.pdf"):
+def makePdf(pdf="compared.pdf", multi=False):
     canvas = r.TCanvas()
+    canvas.SetTickx()
+    canvas.SetTicky()
+
     canvas.Print(pdf+"[")
     funcs = []
     for iEta, eta in enumerate(etas()):
@@ -40,24 +43,29 @@ def makePdf(pdf="compared.pdf"):
             leg.SetBorderSize(0)
             leg.SetFillStyle(0)
 
-        jEta = iEta % 4
-        if not jEta:
-            canvas.cd(0)
-            canvas.Clear()
-            canvas.Divide(2, 2)
+        if multi:
+            jEta = iEta % 4
+            if not jEta:
+                canvas.cd(0)
+                canvas.Clear()
+                canvas.Divide(2, 2)
 
-        canvas.cd(1 + jEta)
-        r.gPad.SetTickx()
-        r.gPad.SetTicky()
+            canvas.cd(1 + jEta)
+            r.gPad.SetTickx()
+            r.gPad.SetTicky()
 
         funcs += drawFuncs(iEta, eta, leg)
 
-        if jEta == 3:
+        if multi:
+            if jEta == 3:
+                canvas.Print(pdf)
+        else:
             canvas.Print(pdf)
 
-    if jEta != 3:
+    if multi and jEta != 3:
         canvas.Print(pdf)
     canvas.Print(pdf+"]")
+
 
 modules = {#"conf4_b_bptMin0_2matches": "0 < b-quark p_{T}",
            "conf4_b_bPtMin0_012matches": "0 < b-quark p_{T}",
