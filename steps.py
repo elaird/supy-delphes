@@ -83,6 +83,28 @@ class matchPtHistogrammer(analysisStep):
                        )
 
 
+class massHistogrammer(analysisStep):
+    def __init__(self, pts=[]):
+        for item in ["pts"]:
+            setattr(self, item, eval(item))
+
+    def bbl(self, pt=None):
+        bin = bisect.bisect_left(self.pts, pt)
+        label = ""
+        if bin != 0:
+            label += "%3.1f < " % self.pts[bin-1]
+        label += "min. b-quark p_{T}"
+        if bin != len(self.pts):
+            label += " #leq %3.1f" % self.pts[bin]
+        return bin, label
+
+    def uponAcceptance(self, eventVars):
+        pt = eventVars["bParticles_minPt"]
+        m = eventVars["JetsFixedMass_bMatched_Corrected_SumP4"].mass()
+        bin, binLabel = self.bbl(pt)
+        self.book.fill(m, "mass_pt%d" % bin, 60, 0.0, 300.0, title=";m_{bb} (GeV),       %s;events / bin" % binLabel)
+
+
 class matchDRHistogrammer(analysisStep):
     def __init__(self, key=""):
         self.key = key
