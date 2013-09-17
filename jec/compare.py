@@ -30,7 +30,7 @@ def drawFuncs(iEta=None, eta=None, leg=None):
     return out
 
 
-def makePdf(pdf="compared.pdf", multi=False):
+def makePdf(pdf="compared.pdf", multi=None):
     canvas = r.TCanvas()
     canvas.SetTickx()
     canvas.SetTicky()
@@ -68,18 +68,21 @@ def makePdf(pdf="compared.pdf", multi=False):
 
 
 modules = {#"conf4_b_bptMin0_2matches": "0 < b-quark p_{T}",
-           "conf4_b_bPtMin0_012matches": "0 < b-quark p_{T}",
+           #"conf0_b_v3": "0 < b-quark p_{T} (conf0)",
+           #"conf4_b_bPtMin0_012matches": "0 < b-quark p_{T} (old)",
+           "conf4_b_bPtMin0_012matches_v2": "0 < b-quark p_{T}",
            "conf4_b_bPtMin10_012matches": "10 < b-quark p_{T}",
            "conf4_b_bPtMin20_012matches": "20 < b-quark p_{T}",
-           "conf4_b_bPtMin30_012matches": "30 < b-quark p_{T}",
+           #"conf4_b_bPtMin30_012matches": "30 < b-quark p_{T} (old)",
+           "conf4_b_bPtMin30_012matches_v2": "30 < b-quark p_{T}",
            #"conf4_b_bPtMin30_2matches": "30 < b-quark p_{T}",
            "conf4_b_genJetPtMin20_012matches": "20 < b-gen-jet p_{T}",
            "conf4_b_genJetPtMin30_012matches": "30 < b-gen-jet p_{T}",
-           #"conf4_j_v1": "30 < j gen-jet p_{T}",
+           ##"conf4_j_v1": "30 < j gen-jet p_{T}",
            }
 
 for module in modules.keys():
     exec("import %s" % module)
 
 
-makePdf()
+makePdf(multi=True)
