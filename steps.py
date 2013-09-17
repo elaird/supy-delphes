@@ -6,8 +6,8 @@ from supy import analysisStep
 
 
 class matchPtHistogrammer(analysisStep):
-    def __init__(self, sourceKey="", etas=[], correctPtAxis=False, correctRatio=False, useJetEta=True):
-        for item in ["sourceKey", "etas", "correctPtAxis", "correctRatio", "useJetEta"]:
+    def __init__(self, sourceKey="", etas=[], correctPtAxis=False, correctRatio=False, plot2D=False):
+        for item in ["sourceKey", "etas", "correctPtAxis", "correctRatio", "plot2D"]:
             setattr(self, item, eval(item))
         self.title = " (%s);matches / bin" % self.sourceKey
 
@@ -16,7 +16,7 @@ class matchPtHistogrammer(analysisStep):
         label = ""
         if bin != 0:
             label += "%3.1f < " % self.etas[bin-1]
-        label += "|%s#eta|" % ("jet " if self.useJetEta else "")
+        label += "|%s#eta|" % ("jet ")
         if bin != len(self.etas):
             label += " #leq %3.1f" % self.etas[bin]
         return bin, label
@@ -39,10 +39,11 @@ class matchPtHistogrammer(analysisStep):
 
         title = ";%s  (%s);%s%s" % (jpt, binLabel, ratiot, self.title)
         name = "rjPt_%d" % bin
-        #self.book.fill((jetPt, ratio),
-        #               name,
-        #               (20, 20), (0.0, 0.0), (200.0, 2.0),
-        #               title=title)
+        if self.plot2D:
+            self.book.fill((jetPt, ratio),
+                           name,
+                           (20, 20), (0.0, 0.0), (200.0, 2.0),
+                           title=title)
 
         self.book.fill((jetPt, ratio),
                        "%s_prof" % name,
@@ -73,7 +74,7 @@ class matchPtHistogrammer(analysisStep):
             if self.correctRatio:
                 ratio *= factor
 
-            bin, binLabel = self.bbl(jet.Eta if self.useJetEta else particle.Eta)
+            bin, binLabel = self.bbl(jet.Eta)
             self.plots(jetPt=jetPt,
                        particlePt=particle.PT,
                        ratio=ratio,
