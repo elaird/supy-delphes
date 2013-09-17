@@ -8,7 +8,7 @@ import ROOT as r
 class deriveCorrections(supy.analysis):
     def parameters(self):
         return {"2matches": True,
-                "checkJec": "conf4_b_bPtMin0_012matches",
+                #"checkJec": "conf4_b_bPtMin30_012matches_v2",
                 }
 
     def listOfSteps(self, params):
@@ -18,6 +18,8 @@ class deriveCorrections(supy.analysis):
                 ##supy.steps.histos.value("rho", 30, 0.0, 150.0),
                 #supy.steps.histos.value("HT", 300, 0.0, 3000.0),
                 supy.steps.filters.multiplicity("%sParticles" % p, min=2, max=2),
+                supy.steps.histos.multiplicity("Duplicates_bParticles_tauParticles"),
+                supy.steps.filters.multiplicity("Duplicates_bParticles_tauParticles", max=0),
                 supy.steps.histos.mass("%sParticles_SumP4" % p, 50, 0.0, 250.0),
                 steps.iterHistogrammer(var="bParticles", attr="PT", func=False, nBins=30, xMin=0.0, xMax=300.0),
                 steps.matchDRHistogrammer("JetMatchedTo_%sParticles_noMaxDR" % p),
@@ -44,7 +46,7 @@ class deriveCorrections(supy.analysis):
                 supy.steps.histos.mass("JetMatchedTo_%sParticles.values_SumP4" % p,   50, 0.0, 250.0),
                 ]
 
-        if params["checkJec"]:
+        if "checkJec" in params:
             out += [
                 supy.steps.filters.label("corrected"),
                 steps.matchPtHistogrammer("JetMatchedTo_%sParticles" % p,
@@ -72,7 +74,7 @@ class deriveCorrections(supy.analysis):
     def listOfCalculables(self, pars):
         listOfCalculables = supy.calculables.zeroArgs(supy.calculables)
         listOfCalculables += supy.calculables.zeroArgs(calculables)
-        if pars["checkJec"]:
+        if "checkJec" in pars:
             listOfCalculables.append(calculables.jecFactor(pars["checkJec"]))
 
         listOfCalculables += [calculables.HT(),
@@ -82,6 +84,7 @@ class deriveCorrections(supy.analysis):
                               ]
         listOfCalculables += [# b
                               calculables.Filtered(pids=[-5, 5], label="b", status=[3], key="Particle", ptMin=0.0),
+                              calculables.minPt("bParticles"),
                               calculables.JetMatchedTo(sourceKey="bParticles"),
                               calculables.JetMatchedTo(sourceKey="bParticles", maxDR=0.3),
                               calculables.SumP4("bParticles"),
@@ -99,6 +102,8 @@ class deriveCorrections(supy.analysis):
 
         listOfCalculables += [# tau
                               calculables.Filtered(pids=[-15, 15], label="tau", key="Particle", status=[3]),
+                              calculables.Duplicates(key1="bParticles", key2="tauParticles", minDR=0.5),
+
                               calculables.JetMatchedTo(sourceKey="tauParticles"),
                               calculables.JetMatchedTo(sourceKey="tauParticles", maxDR=0.3),
                               calculables.SumP4("tauParticles"),
@@ -174,7 +179,7 @@ class deriveCorrections(supy.analysis):
         #org.mergeSamples(targetSpec=gopts("BB_13_21", r.kOrange),  sources=["BB_13_21.GenWeight"])
         org.mergeSamples(targetSpec=gopts("BB", r.kBlue), allWithPrefix="BB_")
 
-        org.mergeSamples(targetSpec=gopts("hh_bb#tau#tau", r.kRed), sources=["hh_bbtt_c4_10"])
+        org.mergeSamples(targetSpec=gopts("hh_bb#tau#tau", r.kRed), sources=["hh_bbtt_c4_pu140_20"])
 
         #org.mergeSamples(targetSpec=gopts("H_c0_pu0",         r.kBlack),   sources=["H_0_3_c0_pu0.GenWeight"])
         #org.mergeSamples(targetSpec=gopts("H_c0_pu140",       r.kBlue),    sources=["H_0_3_c0_pu140.GenWeight"])
