@@ -106,11 +106,13 @@ class LvSumP4(supy.wrappedChain.calculable):
 class Filtered(supy.wrappedChain.calculable):
     @property
     def name(self):
-        return "%s%ss" % (self.label, self.key)
+        return "%s%s%s" % (self.label, self.key, "_Indices" if self.indices else "s")
 
-    def __init__(self, pids=[], status=[], label="", ptMin=None, absEtaMax=None, key="", ptSort=False, pt="PT"):
+    def __init__(self, pids=[], status=[], label="", ptMin=None, absEtaMax=None, key="", ptSort=False, pt="PT", indices=False):
         assert key
-        for item in ["pids", "status", "label", "ptMin", "absEtaMax", "key", "ptSort", "pt"]:
+        if ptSort:
+            assert not indices
+        for item in ["pids", "status", "label", "ptMin", "absEtaMax", "key", "ptSort", "pt", "indices"]:
             setattr(self, item, eval(item))
 
         self.moreName = ""
@@ -125,7 +127,9 @@ class Filtered(supy.wrappedChain.calculable):
 
     def update(self, _):
         self.value = []
-        for particle in self.source[self.key]:
+        particles = self.source[self.key]
+        for iParticle in range(utils.size(self.source, self.key)):
+            particle = particles[iParticle]
             if self.pids and (particle.PID not in self.pids):
                 continue
             if self.status and (particle.Status not in self.status):
@@ -134,7 +138,7 @@ class Filtered(supy.wrappedChain.calculable):
                 continue
             if self.absEtaMax and (self.absEtaMax < abs(particle.Eta)):
                 continue
-            self.value.append(particle)
+            self.value.append(iParticle if self.indices else particle)
         if self.ptSort:
             self.value.sort(key=lambda x:getattr(x, self.pt), reverse=True)
 
