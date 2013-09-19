@@ -22,7 +22,7 @@ def drawFuncs(iEta=None, eta=None, leg=None):
             func.Draw()
             h = func.GetHistogram()
             h.GetYaxis().SetRangeUser(0.0, 2.0)
-            h.SetTitle("#eta = %g; uncorrected jet p_{T} (GeV); correction factor" % eta)
+            h.SetTitle("#eta = %g; uncorrected jet p_{T} (GeV);1.0 / (correction factor)" % eta)
         if not iEta:
             leg.AddEntry(func, label, "l")
         out.append(func)
@@ -67,18 +67,32 @@ def makePdf(pdf="compared.pdf", multi=None):
     canvas.Print(pdf+"]")
 
 
-modules = {#"conf4_b_bptMin0_2matches": "0 < b-quark p_{T}",
+modules = {#"conf4_v2_hb_bPtMin0_012matches": "0 < b-quark p_{T} (h/c4v2)",
+           "conf4_v2_hb_bPtMin30_012matches": "30 < b-quark p_{T} (h)",
+           "conf4_v2_hb_genJetPtMin30_012matches": "30 < b-gen-jet p_{T} (h)",
+
+           #"conf4_v2_hg_gPtMin0_012matches": "0 < gluon p_{T} (h)",
+           "conf4_v2_hg_gPtMin30_012matches": "30 < gluon p_{T} (h)",
+
+           #"conf4_v2_h_genJetPtMin30_012matches":  "30 < gen-jet p_{T} (h/c4v2)",
+           ##"conf4_v2_h_2b_genJetPtMin30_012matches_lowstats":  "30 < gen-jet p_{T} (h2b ls/c4v2)",
+
+           "conf4_v2_qcd_genJetPtMin30_012matches_v2": "30 < gen-jet p_{T} (qcd)",
+
+           #"conf4_b_bptMin0_2matches": "0 < b-quark p_{T}",
            #"conf0_b_v3": "0 < b-quark p_{T} (conf0)",
            #"conf4_b_bPtMin0_012matches": "0 < b-quark p_{T} (old)",
-           "conf4_b_bPtMin0_012matches_v2": "0 < b-quark p_{T}",
-           "conf4_b_bPtMin10_012matches": "10 < b-quark p_{T}",
-           "conf4_b_bPtMin20_012matches": "20 < b-quark p_{T}",
-           #"conf4_b_bPtMin30_012matches": "30 < b-quark p_{T} (old)",
-           "conf4_b_bPtMin30_012matches_v2": "30 < b-quark p_{T}",
-           #"conf4_b_bPtMin30_2matches": "30 < b-quark p_{T}",
-           "conf4_b_genJetPtMin20_012matches": "20 < b-gen-jet p_{T}",
-           "conf4_b_genJetPtMin30_012matches": "30 < b-gen-jet p_{T}",
-           ##"conf4_j_v1": "30 < j gen-jet p_{T}",
+           #"conf4_hb_bPtMin0_012matches_70": "0 < b-quark p_{T} (h/c4/70)",
+           #"conf4_hb_bPtMin30_012matches": "30 < b-quark p_{T} (h/c4/70)",
+           ##"conf4_hb_bPtMin30_012matches_80": "30 < b-quark p_{T} (h/c4/80)",
+           #"conf4_b_bPtMin0_012matches_v2": "0 < b-quark p_{T} (hh/c4)",
+           ##"conf4_b_bPtMin10_012matches": "10 < b-quark p_{T}",
+           ##"conf4_b_bPtMin20_012matches": "20 < b-quark p_{T}",
+           ###"conf4_b_bPtMin30_012matches": "30 < b-quark p_{T} (old)",
+           #"conf4_b_bPtMin30_012matches_v2": "30 < b-quark p_{T} (hh/c4)",
+           ##"conf4_b_bPtMin30_2matches": "30 < b-quark p_{T}",
+           #"conf4_b_genJetPtMin20_012matches": "20 < b-gen-jet p_{T}",
+           #"conf4_b_genJetPtMin30_012matches": "30 < b-gen-jet p_{T}",
            }
 
 for module in modules.keys():
