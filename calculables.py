@@ -143,6 +143,32 @@ class Filtered(supy.wrappedChain.calculable):
             self.value.sort(key=lambda x:getattr(x, self.pt), reverse=True)
 
 
+class Following(supy.wrappedChain.calculable):
+    @property
+    def name(self):
+        return self.__name
+
+    def __init__(self, key="", motherIndices="", daughterIndices="", nMax=None, shortName=False):
+        assert nMax
+        for item in ["key", "motherIndices", "daughterIndices", "nMax"]:
+            setattr(self, item, eval(item))
+
+        if shortName:
+            self.__name = self.daughterIndices
+        else:
+            self.__name = "%s_Following_%s" % (self.daughterIndices, self.motherIndices)
+        self.__name = self.__name.replace("_Indices", "s")
+
+    def update(self, _):
+        self.value = []
+        particles = self.source[self.key]
+        daughterIndices = self.source[self.daughterIndices]
+        for iMother in self.source[self.motherIndices]:
+            for iDaughter in daughterIndices:
+                if iMother < iDaughter <= (iMother + self.nMax):
+                    self.value.append(particles[iDaughter])
+
+
 class bTagged(supy.wrappedChain.calculable):
     @property
     def name(self):
