@@ -6,8 +6,8 @@ from supy import analysisStep
 
 
 class matchPtHistogrammer(analysisStep):
-    def __init__(self, sourceKey="", etas=[], correctPtAxis=False, correctRatio=False, plot2D=False):
-        for item in ["sourceKey", "etas", "correctPtAxis", "correctRatio", "plot2D"]:
+    def __init__(self, sourceKey="", etas=[], correctPtAxis=False, correctRatio=False, plot2D=False, particleLabel="particle"):
+        for item in ["sourceKey", "etas", "correctPtAxis", "correctRatio", "plot2D", "particleLabel"]:
             setattr(self, item, eval(item))
         self.title = " (%s);matches / bin" % self.sourceKey
 
@@ -22,13 +22,18 @@ class matchPtHistogrammer(analysisStep):
         return bin, label
 
     def plots(self, jetPt=None, particlePt=None, ratio=None, bin=None, binLabel=""):
-        ppt = "particle pT"
+        ppt = "%s pT" % self.particleLabel
         jpt = "%sjet pT" % ("c." if self.correctPtAxis else "uc.")
         ratiot = "%sjet pT / %s" % ("c." if self.correctRatio else "uc.", ppt)
 
         self.book.fill(ratio,
-                       "ptRatio",
+                       "ptRatio1",
                        50, 0.0, 2.0,
+                       title=";%s%s" % (ratiot, self.title))
+
+        self.book.fill(ratio,
+                       "ptRatio2",
+                       75, 0.0, 2.5,
                        title=";%s%s" % (ratiot, self.title))
 
         self.book.fill((particlePt, jetPt),
