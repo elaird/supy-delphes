@@ -8,20 +8,33 @@ import ROOT as r
 class deriveCorrections(supy.analysis):
     def parameters(self):
         return {"2matches": True,
-                #"checkJec": "conf4_b_bPtMin30_012matches_v2",
+                #"checkJec": "conf4_v2_hb_bPtMin0_012matches",
+                #"checkJec": "conf4_v2_qcd_genJetPtMin30_012matches_v2",
+                "particle": "b",
                 }
 
     def listOfSteps(self, params):
-        p = "b"
+        p = params["particle"]
         out = []
         out += [supy.steps.printer.progressPrinter(),
-                ##supy.steps.histos.value("rho", 30, 0.0, 150.0),
-                #supy.steps.histos.value("HT", 300, 0.0, 3000.0),
-                supy.steps.filters.multiplicity("%sParticles" % p, min=2, max=2),
-                supy.steps.histos.multiplicity("Duplicates_bParticles_tauParticles"),
-                supy.steps.filters.multiplicity("Duplicates_bParticles_tauParticles", max=0),
-                supy.steps.histos.mass("%sParticles_SumP4" % p, 50, 0.0, 250.0),
-                steps.iterHistogrammer(var="bParticles", attr="PT", func=False, nBins=30, xMin=0.0, xMax=300.0),
+                supy.steps.histos.value("rho", 30, 0.0, 150.0),
+                supy.steps.histos.value("HT", 300, 0.0, 3000.0),
+                ]
+        if p == "g":
+            out += [supy.steps.histos.multiplicity("hParticle_Indices"),
+                    supy.steps.filters.multiplicity("hParticle_Indices", min=1, max=1),
+                    supy.steps.histos.multiplicity("gParticles"),
+                    supy.steps.filters.multiplicity("gParticles", min=2, max=2),
+                    ]
+        if p == "b":
+            out += [supy.steps.filters.multiplicity("bParticles", min=2, max=2),
+                    supy.steps.histos.multiplicity("Duplicates_bParticles_tauParticles"),
+                    supy.steps.filters.multiplicity("Duplicates_bParticles_tauParticles", max=0),
+                    ]
+
+        out += [supy.steps.histos.mass("%sParticles_SumP4" % p, 50, 0.0, 250.0),
+                supy.steps.filters.mass("%sParticles_SumP4" % p, min=124.0, max=126.0),
+                steps.iterHistogrammer(var="%sParticles" % p, attr="PT", func=False, nBins=30, xMin=0.0, xMax=300.0),
                 steps.matchDRHistogrammer("JetMatchedTo_%sParticles_noMaxDR" % p),
                 supy.steps.histos.multiplicity("JetMatchedTo_%sParticles" % p),
                 supy.steps.filters.multiplicity("JetMatchedTo_%sParticles" % p, max=2),
@@ -80,7 +93,17 @@ class deriveCorrections(supy.analysis):
         listOfCalculables += [calculables.HT(),
                               calculables.rho(),
                               calculables.Filtered(pids=[23], label="Z", key="Particle", status=[3]),
-                              calculables.Filtered(pids=[25], label="h", key="Particle", status=[3]),
+                              calculables.Filtered(pids=[25], label="h", key="Particle", status=[3], indices=True),
+                              calculables.Filtered(pids=[21], label="g", key="Particle", status=[3], indices=True, ptMin=30.0),
+                              calculables.Following(key="Particle",
+                                                    motherIndices="hParticle_Indices",
+                                                    daughterIndices="gParticle_Indices",
+                                                    nMax=2, shortName=True),
+                              calculables.SumP4("gParticles"),
+                              calculables.JetMatchedTo(sourceKey="gParticles"),
+                              calculables.JetMatchedTo(sourceKey="gParticles", maxDR=0.3),
+                              supy.calculables.other.values("JetMatchedTo_gParticles"),
+                              calculables.SumP4("JetMatchedTo_gParticles.values"),
                               ]
         listOfCalculables += [# b
                               calculables.Filtered(pids=[-5, 5], label="b", status=[3], key="Particle", ptMin=0.0),
@@ -148,7 +171,12 @@ class deriveCorrections(supy.analysis):
                 #specify(names="hh_bbtt_c0_pu0_20", color=r.kRed) +
                 #specify(names="hh_bbtt_c3_pu140", color=r.kRed) +
                 #specify(names="hh_bbtt_c4_pu140_10", color=r.kRed) +
-                specify(names="hh_bbtt_c4_pu140_20", color=r.kRed) +
+                #specify(names="hh_bbtt_c4_pu140_20", color=r.kRed) +
+
+                specify(names="H_0_3",  weights=w, nFilesMax=5) +
+                specify(names="H_3_8",  weights=w, nFilesMax=3) +
+                specify(names="H_8_15",  weights=w, nFilesMax=5) +
+                specify(names="H_15_1k",  weights=w, nFilesMax=5) +
                 []
                 )
 
@@ -178,6 +206,7 @@ class deriveCorrections(supy.analysis):
         #org.mergeSamples(targetSpec=gopts("BB_7_13",  r.kMagenta), sources=["BB_7_13.GenWeight"])
         #org.mergeSamples(targetSpec=gopts("BB_13_21", r.kOrange),  sources=["BB_13_21.GenWeight"])
         org.mergeSamples(targetSpec=gopts("BB", r.kBlue), allWithPrefix="BB_")
+        org.mergeSamples(targetSpec=gopts("H", r.kBlue), allWithPrefix="H_")
 
         org.mergeSamples(targetSpec=gopts("hh_bb#tau#tau", r.kRed), sources=["hh_bbtt_c4_pu140_20"])
 
@@ -200,7 +229,7 @@ class deriveCorrections(supy.analysis):
                      rowColors=[r.kBlack, r.kViolet+4],
 
                      doLog=False,
-                     fitFunc=lambda x: self.profFit(x, "b_v3"),
+                     fitFunc=lambda x: self.profFit(x, "b_v4"),
                      showStatBox=True,
                      optStat=1100,
                      ).plotAll()
@@ -326,6 +355,21 @@ class deriveCorrections(supy.analysis):
 
         if ("4.0" in xtitle) and not ("3.0" in xtitle):
             func = r.TF1(name, "[0]", min, 80.0)
+        return func
+
+
+    def b_v4(self, histo=None, min=20.0, max=200.0, x=70.0):
+        xtitle = histo.GetXaxis().GetTitle()
+
+        s = "[0]"
+        s += " + (x <= %g)*([1]*(x-%g) + [2]*(x-%g)**2)" % (x, x, x)
+        s += " + (x  > %g)*([3]*(x-%g) + [4]*(x-%g)**2)" % (x, x, x)
+        name = "func"
+        func = r.TF1(name, s, min, max)
+        func.SetParameters(1.0, 0.0, 0.0, 0.0, 0.0)
+
+        if ("4.0" in xtitle) and not ("3.0" in xtitle):
+            func = r.TF1(name, "[0]+[1]*x", min, 80.0)
         return func
 
 
