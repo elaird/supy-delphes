@@ -6,8 +6,11 @@ from supy import analysisStep
 
 
 class matchPtHistogrammer(analysisStep):
-    def __init__(self, sourceKey="", etas=[], correctPtAxis=False, correctRatio=False, plot2D=False, particleLabel="particle"):
-        for item in ["sourceKey", "etas", "correctPtAxis", "correctRatio", "plot2D", "particleLabel"]:
+    def __init__(self, sourceKey="", etas=[], particleLabel="particle",
+                 correctPtAxis=False, correctRatio=False,
+                 plot2D=False, alsoVsParticle=False, alsoVsEta=False):
+        for item in ["sourceKey", "etas", "particleLabel", "correctPtAxis", "correctRatio", "plot2D",
+                     "alsoVsParticle", "alsoVsEta"]:
             setattr(self, item, eval(item))
         self.title = " (%s);matches / bin" % self.sourceKey
 
@@ -21,9 +24,16 @@ class matchPtHistogrammer(analysisStep):
             label += " #leq %3.1f" % self.etas[bin]
         return bin, label
 
-    def plots(self, jetPt=None, particlePt=None, ratio=None, bin=None, binLabel=""):
+    def plots(self,
+              jetPt=None, particlePt=None,
+              jetEta=None, particleEta=None,
+              ratio=None, bin=None, binLabel=""):
+
+        binLabel = "(%s)" % binLabel if self.etas else ""
         ppt = "%s pT" % self.particleLabel
+        peta = ppt.replace("pT", "eta")
         jpt = "%sjet pT" % ("c." if self.correctPtAxis else "uc.")
+        jeta = "jet eta"
         ratiot = "%sjet pT / %s" % ("c." if self.correctRatio else "uc.", ppt)
 
         self.book.fill(ratio,
@@ -42,7 +52,8 @@ class matchPtHistogrammer(analysisStep):
                        title=";%s;%s%s" % (ppt, jpt, self.title))
 
 
-        title = ";%s  (%s);%s%s" % (jpt, binLabel, ratiot, self.title)
+        title = ";%s  %s;%s%s" % (jpt, binLabel, ratiot, self.title)
+        titleE = ";%s  %s;%s%s" % (jeta, binLabel, ratiot, self.title)
         name = "rjPt_%d" % bin
         if self.plot2D:
             self.book.fill((jetPt, ratio),
@@ -52,21 +63,37 @@ class matchPtHistogrammer(analysisStep):
 
         self.book.fill((jetPt, ratio),
                        "%s_prof" % name,
-                       20, 0.0, 200.0,
+                       40, 0.0, 200.0,
                        title=title)
 
+        if self.alsoVsEta:
+            self.book.fill((jetEta, ratio),
+                           "%s_prof" % name.replace("Pt", "Eta"),
+                           120, -6.0, 6.0,
+                           title=titleE)
 
-        #title = ";%s  (%s);%s%s" % (ppt, binLabel, ratiot, self.title)
-        #name = "rpPt_%d" % bin
-        #self.book.fill((particlePt, ratio),
-        #               name,
-        #               (20, 20), (0.0, 0.0), (200.0, 2.0),
-        #               title=title)
-        #self.book.fill((particlePt, ratio),
-        #               "%s_prof" % name,
-        #               20, 0.0, 200.0,
-        #               title=title)
 
+        if self.alsoVsParticle:
+            title = ";%s  %s;%s%s" % (ppt, binLabel, ratiot, self.title)
+            titleE= ";%s  %s;%s%s" % (peta, binLabel, ratiot, self.title)
+            name = "rpPt_%d" % bin
+
+            if self.plot2D:
+                self.book.fill((particlePt, ratio),
+                               name,
+                               (20, 20), (0.0, 0.0), (200.0, 2.0),
+                               title=title)
+
+            self.book.fill((particlePt, ratio),
+                           "%s_prof" % name,
+                           40, 0.0, 200.0,
+                           title=title)
+
+            if self.alsoVsEta:
+                self.book.fill((particleEta, ratio),
+                               "%s_prof" % name.replace("Pt", "Eta"),
+                               120, -6.0, 6.0,
+                               title=titleE)
 
     def uponAcceptance(self, eventVars):
         for particle, jet in eventVars[self.sourceKey].iteritems():
@@ -85,6 +112,8 @@ class matchPtHistogrammer(analysisStep):
                        ratio=ratio,
                        bin=bin,
                        binLabel=binLabel,
+                       jetEta=jet.Eta,
+                       particleEta=particle.Eta,
                        )
 
 
