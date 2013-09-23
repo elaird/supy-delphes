@@ -226,6 +226,22 @@ class JetMatchedTo(supy.wrappedChain.calculable):
                 self.value[particle] = min(dR)[1]
 
 
+class PtRatio(supy.wrappedChain.calculable):
+    @property
+    def name(self):
+        return "%s_PtRatio" % self.key
+
+    def __init__(self, key=""):
+        self.key = key
+
+    def update(self, _):
+        self.value = []
+        for p, j in self.source[self.key].iteritems():
+            num = j.PT
+            den = p.PT
+            self.value.append(num/den if den else None)
+
+
 class DeltaR(supy.wrappedChain.calculable):
     @property
     def name(self):
@@ -333,4 +349,16 @@ class minPt(supy.wrappedChain.calculable):
 
     def update(self, _):
         values = [x.PT for x in self.source[self.key]]
+        self.value = min(values) if values else None
+
+class minItem(supy.wrappedChain.calculable):
+    @property
+    def name(self):
+        return "min_%s" % self.key
+
+    def __init__(self, key):
+        self.key = key
+
+    def update(self, _):
+        values = self.source[self.key]
         self.value = min(values) if values else None
