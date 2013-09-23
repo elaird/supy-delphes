@@ -257,6 +257,16 @@ class iterHistogrammer(analysisStep):
             self.book.fill(value, key, *self.bins, title=";%s;%s / bin" % (key, yTitle))
 
 
+class listHistogrammer(analysisStep):
+    def __init__(self, key="", nBins=None, xMin=None, xMax=None):
+        self.key = key
+        self.bins = (nBins, xMin, xMax)
+
+    def uponAcceptance(self, eventVars):
+        for value in eventVars[self.key]:
+            self.book.fill(value, self.key, *self.bins, title=";%s;items / bin" % self.key)
+
+
 class modEntry(analysisStep):
     def __init__(self, base=None, value=None):
         for item in ["base", "value"]:
