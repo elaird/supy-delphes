@@ -8,62 +8,84 @@ class response(supy.analysis):
     def listOfSteps(self, _):
         pt = {"attr": "PT",  "func": False, "nBins": 200, "xMin": 0.0, "xMax": 1000.0}
         eta= {"attr": "Eta", "func": False, "nBins": 120, "xMin": -6.0, "xMax": 6.0}
+        j = "GenJet"
         #g = "GenJet"
-        g = "70GenJets"
-        return [supy.steps.printer.progressPrinter(),
-                #supy.steps.histos.value("rho", 30, 0.0, 150.0),
-                #supy.steps.histos.value("HT", 100, 0.0, 1000.0),
-                #steps.iterHistogrammer(var="GenJet", attr="PT", func=False, nBins=30, xMin=0.0, xMax=300.0),
-                #supy.steps.histos.multiplicity("JetMatchedTo_GenJet"),
+        #g = "70GenJets"
+        g = "bParticles"
+        require2b = True
 
-                steps.iterHistogrammer(var=g, **pt),
+        out = [supy.steps.printer.progressPrinter(),
+               #supy.steps.histos.value("rho", 30, 0.0, 150.0),
+               supy.steps.histos.value("HT", 100, 0.0, 1000.0),
+               #steps.iterHistogrammer(var="GenJet", attr="PT", func=False, nBins=30, xMin=0.0, xMax=300.0),
+               #supy.steps.histos.multiplicity("JetMatchedTo_GenJet"),
+               ]
+
+        if require2b:
+            out += [supy.steps.filters.multiplicity("bParticles", min=2, max=2),
+                    supy.steps.histos.mass("bParticles_SumP4", 50, 0.0, 250.0),
+                    supy.steps.filters.mass("bParticles_SumP4", min=124.0, max=126.0),
+                    ]
+
+        out += [steps.iterHistogrammer(var=g, **pt),
                 steps.iterHistogrammer(var=g, **eta),
 
-                steps.iterHistogrammer(var="Jet", **pt),
-                steps.iterHistogrammer(var="Jet", **eta),
+                steps.iterHistogrammer(var=j, **pt),
+                steps.iterHistogrammer(var=j, **eta),
 
-                steps.matchDRHistogrammer("JetMatchedTo_%s_noMaxDR" % g),
-                steps.matchDRHistogrammer("JetMatchedTo_%s" % g),
+                steps.matchDRHistogrammer("%sMatchedTo_%s_noMaxDR" % (j, g)),
+                steps.matchDRHistogrammer("%sMatchedTo_%s" % (j, g)),
 
-                steps.iterHistogrammer(var="JetMatchedTo_%s.keys" % g, **pt),
-                steps.iterHistogrammer(var="JetMatchedTo_%s.keys" % g, **eta),
+                steps.iterHistogrammer(var="%sMatchedTo_%s.keys" % (j, g), **pt),
+                steps.iterHistogrammer(var="%sMatchedTo_%s.keys" % (j, g), **eta),
 
-                steps.iterHistogrammer(var="JetMatchedTo_%s.values" % g, **pt),
-                steps.iterHistogrammer(var="JetMatchedTo_%s.values" % g, **eta),
+                steps.iterHistogrammer(var="%sMatchedTo_%s.values" % (j, g), **pt),
+                steps.iterHistogrammer(var="%sMatchedTo_%s.values" % (j, g), **eta),
 
-                steps.matchPtHistogrammer("JetMatchedTo_%s" % g,
+                steps.matchPtHistogrammer("%sMatchedTo_%s" % (j, g),
                                           etas=[],
-                                          particleLabel="gen. jet",
+                                          #particleLabel="gen. jet",
                                           correctPtAxis=False,
                                           correctRatio=False,
                                           alsoVsParticle=True,
                                           alsoVsEta=True,
                                           ),
-                #steps.matchPtHistogrammer("JetMatchedTo_GenJet",
-                #                          etas=[0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0, 4.0],
-                #                          correctPtAxis=False,
-                #                          correctRatio=False,
-                #                          particleLabel="gen. jet",
-                #                          ),
                 ]
+        return out
 
 
     def listOfCalculables(self, pars):
+        maxDR = 0.3
         listOfCalculables = supy.calculables.zeroArgs(supy.calculables)
         listOfCalculables += supy.calculables.zeroArgs(calculables)
         listOfCalculables += [calculables.HT(),
                               calculables.rho(),
                               calculables.JetMatchedTo(sourceKey="GenJet"),
-                              calculables.JetMatchedTo(sourceKey="GenJet", maxDR=0.6),
+                              calculables.JetMatchedTo(sourceKey="GenJet", maxDR=maxDR),
                               supy.calculables.other.values("JetMatchedTo_GenJet"),
                               supy.calculables.other.keys("JetMatchedTo_GenJet"),
 
                               calculables.Filtered(label="70", key="GenJet", ptMin=70.0),
                               calculables.JetMatchedTo(sourceKey="70GenJets"),
-                              calculables.JetMatchedTo(sourceKey="70GenJets", maxDR=0.6),
+                              calculables.JetMatchedTo(sourceKey="70GenJets", maxDR=maxDR),
                               supy.calculables.other.values("JetMatchedTo_70GenJets"),
                               supy.calculables.other.keys("JetMatchedTo_70GenJets"),
-                              
+
+                              calculables.Filtered(pids=[-5, 5], label="b", status=[3], key="Particle", ptMin=0.0),
+                              calculables.SumP4("bParticles"),
+
+                              calculables.JetMatchedTo(sourceKey="bParticles"),
+                              calculables.JetMatchedTo(sourceKey="bParticles", maxDR=maxDR),
+                              supy.calculables.other.values("JetMatchedTo_bParticles"),
+                              supy.calculables.other.keys("JetMatchedTo_bParticles"),
+
+                              calculables.JetMatchedTo(sourceKey="bParticles", jetKey="GenJet"),
+                              calculables.JetMatchedTo(sourceKey="bParticles", jetKey="GenJet", maxDR=maxDR),
+                              supy.calculables.other.values("GenJetMatchedTo_bParticles"),
+                              supy.calculables.other.keys("GenJetMatchedTo_bParticles"),
+
+                              calculables.PtRatio("GenJetMatchedTo_bParticles"),
+                              calculables.minItem("GenJetMatchedTo_bParticles_PtRatio"),
                               ]
         return listOfCalculables
 
@@ -77,12 +99,12 @@ class response(supy.analysis):
         from supy.samples import specify
         w = calculables.GenWeight()
 
-        return (specify(names="QCD_c4_pu140_Pt_0p3_4") +
+        return (#specify(names="QCD_c4_pu140_Pt_0p3_4") +
 
-                #specify(names="H_0_3",  weights=w, nFilesMax=5) +
-                #specify(names="H_3_8",  weights=w, nFilesMax=3) +
-                #specify(names="H_8_15",  weights=w, nFilesMax=5) +
-                #specify(names="H_15_1k",  weights=w, nFilesMax=5) +
+                specify(names="H_0_3",  weights=w, nFilesMax=5) +
+                specify(names="H_3_8",  weights=w, nFilesMax=3) +
+                specify(names="H_8_15",  weights=w, nFilesMax=5) +
+                specify(names="H_15_1k",  weights=w, nFilesMax=5) +
                 []
                 )
 
@@ -92,6 +114,7 @@ class response(supy.analysis):
         def gopts(name="", color=1):
             return {"name":name, "color":color, "markerStyle":1, "lineWidth":2, "goptions":"ehist"}
         org.mergeSamples(targetSpec=gopts("QCD", r.kBlue), sources=["QCD_c4_pu140_Pt_0p3_4"])
+        org.mergeSamples(targetSpec=gopts("H", r.kBlue), allWithPrefix="H_")
         org.scale(1.0/fb)
         supy.plotter(org,
                      pdfFileName=self.pdfFileName(org.tag),
@@ -131,8 +154,9 @@ class response(supy.analysis):
         if type(histo) is not r.TProfile:
             return
 
+        histo.GetYaxis().SetRangeUser(0.0, 2.0)
         xtitle = histo.GetXaxis().GetTitle()
-        
+
         if "jet eta" not in xtitle:
             return
 
