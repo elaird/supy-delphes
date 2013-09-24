@@ -7,8 +7,8 @@ import ROOT as r
 
 class reco(supy.analysis):
     def parameters(self):
-        return {"jec": self.vary({"c0_pu0": "conf0_b_v3",
-                                  "c4_pu140": "conf4_b_v2",
+        return {"jec": self.vary({#"c0_pu0": ("c0", "b_v3"),
+                                  "c4_pu140": ("c41", "b_v2_10"),
                                   }),
                 }
 
@@ -62,9 +62,9 @@ class reco(supy.analysis):
         listOfCalculables += supy.calculables.zeroArgs(calculables)
         listOfCalculables += [calculables.HT(),
                               calculables.rho(),
-                              calculables.jecFactor(pars["jec"]),
-                              calculables.Filtered(pids=[-5, 5], label="b", status=[3]),
-                              calculables.Filtered(pids=[-15, 15], label="tau", status=[3]),
+                              calculables.jecFactor(*pars["jec"]),
+                              calculables.Filtered(pids=[-5, 5], label="b", key="Particle", status=[3]),
+                              calculables.Filtered(pids=[-15, 15], label="tau", key="Particle", status=[3]),
                               calculables.Filtered(label="", ptMin=20.0, absEtaMax=2.4, key="Jet"),
                               calculables.bTagged("Jets", mask=0x1),
                               calculables.tauTagged("Jets"),
