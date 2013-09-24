@@ -41,10 +41,12 @@ h.add("hh_bbtt_c41_pu140_10", l("HHToBBTT_10GeVJets_14TeV", confOverride="/Phase
 h.add("hh_bbtt_c41_pu140_20", l("HHToBBTT_14TeV",           confOverride="/PhaseII/Configuration4/140PileUp/"), xs=2.5*fb)
 
 hhSkim0 = 'utils.fileListFromDisk(location="%s/PhaseI/Configuration0/NoPileUp/hh_skim_v2/%s/")' % (skimDir, '%s')
-hhSkim4 = 'utils.fileListFromDisk(location="%s/PhaseII/Configuration4/140PileUp/hh_skim_v2/%s/")' % (skimDir, '%s')
-h.add("hh_bbtt_c41_pu140_10_skim", hhSkim4 % '10GeV', xs=9.439792e-03 * 2.500000e-03)
-h.add("hh_bbtt_c41_pu140_20_skim", hhSkim4 % '20GeV', xs=5.575478e-03 * 2.500000e-03)
-h.add("hh_bbtt_c0_pu0_20_skim",   hhSkim0 % '20GeV', xs=2.114810e-02 * 2.500000e-03)
+hhSkim41 = 'utils.fileListFromDisk(location="%s/PhaseII/Configuration4/140PileUp/hh_skim_v2/%s/")' % (skimDir, '%s')
+hhSkim4 = 'utils.fileListFromDisk(location="%s/PhaseII/Configuration4v2/140PileUp/hh_skim_v3/%s/")' % (skimDir, '%s')
+h.add("hh_bbtt_c41_pu140_10_skim", hhSkim41 % '10GeV', xs=9.439792e-03 * 2.500000e-03)
+h.add("hh_bbtt_c41_pu140_20_skim", hhSkim41 % '20GeV', xs=5.575478e-03 * 2.500000e-03)
+h.add("hh_bbtt_c0_pu0_20_skim",    hhSkim0  % '20GeV', xs=2.114810e-02 * 2.500000e-03)
+h.add("hh_bbtt_c4_pu140_20_skim",  hhSkim4  % '20GeV', xs=1.165776e-02 * 2.500000e-03)
 
 h.add("B",         l("B-4p-0-1-v1510_14TEV"),          xs=200944.*pb)
 
