@@ -11,7 +11,7 @@ class jecFactor(supy.wrappedChain.calculable):
         exec("from jec import %s" % package)
         exec("from jec.%s import %s" % (package, module))
         self.f = getattr(eval(module), "f")
-        self.moreName = module
+        self.moreName = "/".join([package, module])
 
     def corr(self, pt, eta):
         func = self.f(eta)
