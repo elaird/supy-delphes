@@ -13,7 +13,7 @@ def etas(nEta=10, min=0.0, max=3.0, offset=0.1):
 
 def drawFuncs(iEta=None, eta=None, leg=None):
     out = []
-    for iModule, (module, label) in enumerate(sorted(modules.iteritems())):
+    for iModule, ((d, module), label) in enumerate(sorted(modules.iteritems())):
         func = getattr(eval(module), "f")(eta).Clone("func_%d_%d_%s" % (iEta, iModule, module))
         func.SetLineColor(1 + iModule)
         if iModule:
@@ -67,19 +67,21 @@ def makePdf(pdf="compared.pdf", multi=None):
     canvas.Print(pdf+"]")
 
 
-modules = {#"conf4_v2_hb_bPtMin0_012matches": "0 < b-quark p_{T} (h/c4v2)",
-           "conf4_v2_hb_bPtMin30_012matches": "30 < b-quark p_{T} (h)",
-           "conf4_v2_hb_genJetPtMin30_012matches": "30 < b-gen-jet p_{T} (h)",
+modules = {("c4", "hb_bPtMin0_012matches"): "0 < b-quark p_{T} (h/012m)",
+           ("c4", "hh_bPtMin0_2matches"): "0 < b-quark p_{T} (hh/2m)",
+           ("c4", "hh_bPtMin0_012matches"): "0 < b-quark p_{T} (hh/012m)",
+           ("c4", "hb_bPtMin30_012matches"): "30 < b-quark p_{T} (h/012m)",
+           #"conf4_v2_hb_genJetPtMin30_012matches": "30 < b-gen-jet p_{T} (h)",
 
            #"conf4_v2_hg_gPtMin0_012matches": "0 < gluon p_{T} (h)",
-           "conf4_v2_hg_gPtMin30_012matches": "30 < gluon p_{T} (h)",
+           #"conf4_v2_hg_gPtMin30_012matches": "30 < gluon p_{T} (h)",
 
            #"conf4_v2_h_genJetPtMin30_012matches":  "30 < gen-jet p_{T} (h/c4v2)",
            ##"conf4_v2_h_2b_genJetPtMin30_012matches_lowstats":  "30 < gen-jet p_{T} (h2b ls/c4v2)",
 
-           "conf4_v2_qcd_genJetPtMin30_012matches_v2": "30 < gen-jet p_{T} (qcd)",
+           #"conf4_v2_qcd_genJetPtMin30_012matches_v2": "30 < gen-jet p_{T} (qcd)",
 
-           #"conf4_b_bptMin0_2matches": "0 < b-quark p_{T}",
+           #"conf4_b_bPtMin0_2matches": "0 < b-quark p_{T} (hh/2m/1)",
            #"conf0_b_v3": "0 < b-quark p_{T} (conf0)",
            #"conf4_b_bPtMin0_012matches": "0 < b-quark p_{T} (old)",
            #"conf4_hb_bPtMin0_012matches_70": "0 < b-quark p_{T} (h/c4/70)",
@@ -95,8 +97,8 @@ modules = {#"conf4_v2_hb_bPtMin0_012matches": "0 < b-quark p_{T} (h/c4v2)",
            #"conf4_b_genJetPtMin30_012matches": "30 < b-gen-jet p_{T}",
            }
 
-for module in modules.keys():
-    exec("import %s" % module)
+for d, module in modules.keys():
+    exec("from %s import %s" % (d, module))
 
 
 makePdf(multi=True)
