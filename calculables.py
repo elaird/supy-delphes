@@ -7,9 +7,11 @@ import supy
 import jec
 
 class jecFactor(supy.wrappedChain.calculable):
-    def __init__(self, file=""):
-        self.f = getattr(jec, file).f
-        self.moreName = file
+    def __init__(self, package="", module=""):
+        exec("from jec import %s" % package)
+        exec("from jec.%s import %s" % (package, module))
+        self.f = getattr(eval(module), "f")
+        self.moreName = module
 
     def corr(self, pt, eta):
         func = self.f(eta)
