@@ -8,8 +8,7 @@ import ROOT as r
 class deriveCorrections(supy.analysis):
     def parameters(self):
         return {"2matches": True,
-                #"checkJec": "conf4_v2_hb_bPtMin0_012matches",
-                #"checkJec": "conf4_v2_qcd_genJetPtMin30_012matches_v2",
+                "checkJec": ("c41", "b_v2_10"),
                 "particle": "b",
                 }
 
@@ -88,7 +87,7 @@ class deriveCorrections(supy.analysis):
         listOfCalculables = supy.calculables.zeroArgs(supy.calculables)
         listOfCalculables += supy.calculables.zeroArgs(calculables)
         if "checkJec" in pars:
-            listOfCalculables.append(calculables.jecFactor(pars["checkJec"]))
+            listOfCalculables.append(calculables.jecFactor(*pars["checkJec"]))
 
         listOfCalculables += [calculables.HT(),
                               calculables.rho(),
@@ -173,10 +172,12 @@ class deriveCorrections(supy.analysis):
                 #specify(names="hh_bbtt_c4_pu140_10", color=r.kRed) +
                 #specify(names="hh_bbtt_c4_pu140_20", color=r.kRed) +
 
-                specify(names="H_0_3",  weights=w, nFilesMax=5) +
-                specify(names="H_3_8",  weights=w, nFilesMax=3) +
-                specify(names="H_8_15",  weights=w, nFilesMax=5) +
-                specify(names="H_15_1k",  weights=w, nFilesMax=5) +
+                specify(names="hh_bbtt") +
+
+                #specify(names="H_0_3",  weights=w, nFilesMax=5) +
+                #specify(names="H_3_8",  weights=w, nFilesMax=3) +
+                #specify(names="H_8_15",  weights=w, nFilesMax=5) +
+                #specify(names="H_15_1k",  weights=w, nFilesMax=5) +
                 []
                 )
 
@@ -208,7 +209,7 @@ class deriveCorrections(supy.analysis):
         org.mergeSamples(targetSpec=gopts("BB", r.kBlue), allWithPrefix="BB_")
         org.mergeSamples(targetSpec=gopts("H", r.kBlue), allWithPrefix="H_")
 
-        org.mergeSamples(targetSpec=gopts("hh_bb#tau#tau", r.kRed), sources=["hh_bbtt_c4_pu140_20"])
+        org.mergeSamples(targetSpec=gopts("hh_bb#tau#tau", r.kRed), sources=["hh_bbtt"])
 
         #org.mergeSamples(targetSpec=gopts("H_c0_pu0",         r.kBlack),   sources=["H_0_3_c0_pu0.GenWeight"])
         #org.mergeSamples(targetSpec=gopts("H_c0_pu140",       r.kBlue),    sources=["H_0_3_c0_pu140.GenWeight"])
