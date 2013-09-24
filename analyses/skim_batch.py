@@ -12,9 +12,9 @@ class skim_batch(supy.analysis):
                 supy.steps.histos.multiplicity("Jets"),
                 supy.steps.filters.multiplicity("Jets", min=4),
                 supy.steps.histos.multiplicity("bTagged_Jets_mask1"),
-                supy.steps.filters.multiplicity("bTagged_Jets_mask1", min=2, max=2),
+                supy.steps.filters.multiplicity("bTagged_Jets_mask1", min=2),
                 supy.steps.histos.multiplicity("tauTagged_Jets"),
-                supy.steps.filters.multiplicity("tauTagged_Jets", min=2, max=2),
+                supy.steps.filters.multiplicity("tauTagged_Jets", min=2),
                 supy.steps.other.skimmer(),
                 ]
 
@@ -24,7 +24,6 @@ class skim_batch(supy.analysis):
         listOfCalculables += supy.calculables.zeroArgs(calculables)
         listOfCalculables += [calculables.HT(),
                               calculables.rho(),
-                              calculables.Filtered(pids=[-15, 15], label="tau", status=[3]),
                               calculables.Filtered(label="", ptMin=20.0, absEtaMax=2.4, key="Jet"),
                               calculables.bTagged("Jets", mask=0x1),
                               calculables.tauTagged("Jets"),
