@@ -95,8 +95,8 @@ class reco(supy.analysis):
 
 
     def listOfSampleDictionaries(self):
-        from samples import h
-        return [h]
+        from samples import skims
+        return [skims]
 
 
     def listOfSamples(self, pars):
@@ -105,13 +105,24 @@ class reco(supy.analysis):
 
         c = pars["tag"]
         el = 1e5/fb
-        return (specify(names="tt_%s_0_6_skim" % c,   weights=w, effectiveLumi=el) +
+        return (##specify(names="hh_bbtt_%s_10_skim" % c) +
+                specify(names="hh_bbtt_%s_20_skim" % c) +
+                
+                specify(names="tt_%s_0_6_skim" % c,   weights=w, effectiveLumi=el) +
                 specify(names="tt_%s_6_11_skim" % c,  weights=w, effectiveLumi=el) +
                 specify(names="tt_%s_11_17_skim" % c, weights=w, effectiveLumi=el) +
                 specify(names="tt_%s_17_25_skim" % c, weights=w, effectiveLumi=el) +
                 specify(names="tt_%s_25_1k_skim" % c, weights=w, effectiveLumi=el) +
-                #specify(names="hh_bbtt_%s_10_skim" % c) +
-                specify(names="hh_bbtt_%s_20_skim" % c) +
+
+                specify(names="BB_%s_0_3_skim" % c, weights=w, effectiveLumi=el) +
+                specify(names="BB_%s_3_7_skim" % c, weights=w, effectiveLumi=el) +
+                specify(names="BB_%s_7_13_skim" % c, weights=w, effectiveLumi=el) +
+                specify(names="BB_%s_13_21_skim" % c, weights=w, effectiveLumi=el) +
+                specify(names="BB_%s_21_1k_skim" % c, weights=w, effectiveLumi=el) +
+
+                specify(names="BBB_%s_0_6_skim" % c, weights=w, effectiveLumi=el) +
+                specify(names="BBB_%s_6_13_skim" % c, weights=w, effectiveLumi=el) +
+                specify(names="BBB_%s_13_1k_skim" % c, weights=w, effectiveLumi=el) +
 
                 #specify(names="tt_0_6",   weights=w) + #, nEventsMax=n) +
                 #specify(names="tt_6_11",  weights=w) + #, nEventsMax=n) +
@@ -140,17 +151,29 @@ class reco(supy.analysis):
         #org.mergeSamples(targetSpec=gopts("hh_bbtt_c4_10", r.kRed), sources=["hh_bbtt_c4_10"])
         #org.mergeSamples(targetSpec=gopts("hh_bbtt", r.kRed), sources=["hh_bbtt_c4_20"])
 
+        keep = False
         c = pars["tag"]
         org.mergeSamples(targetSpec=gopts("tt_0_6",   r.kBlue),    sources=["tt_%s_0_6_skim.GenWeight" % c])
         org.mergeSamples(targetSpec=gopts("tt_6_11",  r.kGreen),   sources=["tt_%s_6_11_skim.GenWeight" % c])
         org.mergeSamples(targetSpec=gopts("tt_11_17", r.kCyan),    sources=["tt_%s_11_17_skim.GenWeight" % c])
         org.mergeSamples(targetSpec=gopts("tt_17_25", r.kMagenta), sources=["tt_%s_17_25_skim.GenWeight" % c])
         org.mergeSamples(targetSpec=gopts("tt_25_1k", r.kOrange),  sources=["tt_%s_25_1k_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("tt", r.kBlack), allWithPrefix="tt_", keepSources=keep)
 
+        org.mergeSamples(targetSpec=gopts("BB_0_3",   r.kBlue),    sources=["BB_%s_0_3_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("BB_3_7",  r.kGreen),    sources=["BB_%s_3_7_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("BB_7_13", r.kCyan),     sources=["BB_%s_7_13_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("BB_13_21", r.kMagenta), sources=["BB_%s_13_21_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("BB_21_1k", r.kOrange),  sources=["BB_%s_21_1k_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("BB", r.kBlue), allWithPrefix="BB_", keepSources=keep)
+
+        org.mergeSamples(targetSpec=gopts("BBB_0_6",  r.kBlue),    sources=["BBB_%s_0_6_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("BBB_6_13", r.kGreen),   sources=["BBB_%s_6_13_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("BBB_13_1k", r.kCyan),   sources=["BBB_%s_13_1k_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("BBB", r.kCyan), allWithPrefix="BBB_", keepSources=keep)
+        
         org.mergeSamples(targetSpec=gopts("hh_bb#tau#tau", r.kRed), sources=["hh_bbtt_%s_20_skim" % c])
         
-        org.mergeSamples(targetSpec=gopts("tt", r.kBlack), allWithPrefix="tt_", keepSources=True)
-
         org.scale(3.e3/fb)
         #org.scale(toPdf=True)
 
