@@ -45,15 +45,15 @@ class skim_batch(supy.analysis):
                 #specify(names="tt_17_25", weights=w) +
                 #specify(names="tt_25_1k", weights=w) +
                 #
-                #specify(names="BB_0_3",    weights=w) +
-                #specify(names="BB_3_7",    weights=w) +
-                #specify(names="BB_7_13",   weights=w) +
-                #specify(names="BB_13_21",  weights=w) +
-                #specify(names="BB_21_1k",  weights=w) +
+                specify(names="BB_0_3",    weights=w) +
+                specify(names="BB_3_7",    weights=w) +
+                specify(names="BB_7_13",   weights=w) +
+                specify(names="BB_13_21",  weights=w) +
+                specify(names="BB_21_1k",  weights=w) +
 
-                specify(names="BBB_0_6",   weights=w) +
-                specify(names="BBB_6_13",  weights=w) +
-                specify(names="BBB_13_1k", weights=w) +
+                #specify(names="BBB_0_6",   weights=w) +
+                #specify(names="BBB_6_13",  weights=w) +
+                #specify(names="BBB_13_1k", weights=w) +
 
                 #specify(names="hh_bbtt_c0_pu0") +
                 []
