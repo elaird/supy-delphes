@@ -8,7 +8,8 @@ import ROOT as r
 class reco(supy.analysis):
     def parameters(self):
         return {"jec": self.vary({#"c0_pu0": ("c0", "b_v3"),
-                                  "c4_pu140": ("c41", "b_v2_10"),
+                                  #"c4_pu140": ("c41", "b_v2_10"),
+                                  "c4_pu140": ("c4", "one"),
                                   }),
                 }
 
