@@ -39,23 +39,73 @@ class skim_batch(supy.analysis):
     def listOfSamples(self, pars):
         from supy.samples import specify
         w = calculables.GenWeight()
-        return (#specify(names="tt_0_6",   weights=w) +
+        return (#specify(names="hh_bbtt_c0_pu0") +
+
+                #specify(names="tt_0_6",   weights=w) +
                 #specify(names="tt_6_11",  weights=w) +
                 #specify(names="tt_11_17", weights=w) +
                 #specify(names="tt_17_25", weights=w) +
                 #specify(names="tt_25_1k", weights=w) +
-                #
-                specify(names="BB_0_3",    weights=w) +
-                specify(names="BB_3_7",    weights=w) +
-                specify(names="BB_7_13",   weights=w) +
-                specify(names="BB_13_21",  weights=w) +
-                specify(names="BB_21_1k",  weights=w) +
+
+                #specify(names="BB_0_3",    weights=w) +
+                #specify(names="BB_3_7",    weights=w) +
+                #specify(names="BB_7_13",   weights=w) +
+                #specify(names="BB_13_21",  weights=w) +
+                #specify(names="BB_21_1k",  weights=w) +
 
                 #specify(names="BBB_0_6",   weights=w) +
                 #specify(names="BBB_6_13",  weights=w) +
                 #specify(names="BBB_13_1k", weights=w) +
 
-                #specify(names="hh_bbtt_c0_pu0") +
+                specify(names="B",         weights=w) +
+
+                specify(names="Bj_0_3",    weights=w) +
+                specify(names="Bj_3_6",    weights=w) +
+                specify(names="Bj_6_11",   weights=w) +
+                specify(names="Bj_11_18",  weights=w) +
+                specify(names="Bj_18_27",  weights=w) +
+                specify(names="Bj_27_37",  weights=w) +
+                specify(names="Bj_37_1k",  weights=w) +
+
+                specify(names="Bjj_0_7",   weights=w) +
+                specify(names="Bjj_7_14",  weights=w) +
+                specify(names="Bjj_14_23", weights=w) +
+                specify(names="Bjj_23_34", weights=w) +
+                #specify(names="Bjj_34_1k", weights=w) +
+
+                specify(names="H_0_3",     weights=w) +
+                specify(names="H_3_8",     weights=w) +
+                specify(names="H_8_15",    weights=w) +
+                specify(names="H_15_1k",   weights=w) +
+
+                specify(names="LL_0_1",    weights=w) +
+                specify(names="LL_1_2",    weights=w) +
+                specify(names="LL_2_5",    weights=w) +
+                specify(names="LL_5_9",    weights=w) +
+                specify(names="LL_9_14",   weights=w) +
+                specify(names="LL_14_1k",  weights=w) +
+
+                specify(names="LLB_0_4",   weights=w) +
+                specify(names="LLB_4_9",   weights=w) +
+                specify(names="LLB_9_1k",  weights=w) +
+
+                specify(names="tB_0_5",    weights=w) +
+                specify(names="tB_5_9",    weights=w) +
+                specify(names="tB_9_15",   weights=w) +
+                specify(names="tB_15_22",  weights=w) +
+                specify(names="tB_22_1k",  weights=w) +
+
+                specify(names="tj_0_5",    weights=w) +
+                specify(names="tj_5_10",   weights=w) +
+                specify(names="tj_10_16",  weights=w) +
+                specify(names="tj_16_24",  weights=w) +
+                specify(names="tj_24_1k",  weights=w) +
+
+                specify(names="ttB_0_9",   weights=w) +
+                specify(names="ttB_9_16",  weights=w) +
+                specify(names="ttB_16_25", weights=w) +
+                specify(names="ttB_25_1k", weights=w) +
+                
                 []
                 )
 
