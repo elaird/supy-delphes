@@ -11,6 +11,7 @@ class reco(supy.analysis):
                                   #"c4_pu140": ("c41", "b_v2_10"),
                                   "c4_pu140": ("c4", "one"),
                                   }),
+                "keepSources": False,
                 }
 
     def listOfSteps(self, pars):
@@ -106,34 +107,74 @@ class reco(supy.analysis):
 
         c = pars["tag"]
         el = 1e5/fb
-        return (##specify(names="hh_bbtt_%s_10_skim" % c) +
-                specify(names="hh_bbtt_%s_20_skim" % c) +
+
+        out = []
+        #out += specify(names="hh_bbtt_%s_10_skim" % c)
+        out += specify(names="hh_bbtt_%s_20_skim" % c)
                 
-                specify(names="tt_%s_0_6_skim" % c,   weights=w, effectiveLumi=el) +
-                specify(names="tt_%s_6_11_skim" % c,  weights=w, effectiveLumi=el) +
-                specify(names="tt_%s_11_17_skim" % c, weights=w, effectiveLumi=el) +
-                specify(names="tt_%s_17_25_skim" % c, weights=w, effectiveLumi=el) +
-                specify(names="tt_%s_25_1k_skim" % c, weights=w, effectiveLumi=el) +
+        names = ["tt_%s_0_6_skim" % c,
+                 "tt_%s_6_11_skim" % c,
+                 "tt_%s_11_17_skim" % c,
+                 "tt_%s_17_25_skim" % c,
+                 "tt_%s_25_1k_skim" % c,
+                 ]
 
-                specify(names="BB_%s_0_3_skim" % c, weights=w, effectiveLumi=el) +
-                specify(names="BB_%s_3_7_skim" % c, weights=w, effectiveLumi=el) +
-                specify(names="BB_%s_7_13_skim" % c, weights=w, effectiveLumi=el) +
-                specify(names="BB_%s_13_21_skim" % c, weights=w, effectiveLumi=el) +
-                specify(names="BB_%s_21_1k_skim" % c, weights=w, effectiveLumi=el) +
+        if c=="c4_pu140":
+            names += ["B_skim",
+                      "Bj_0_3_skim",
+                      "Bj_3_6_skim",
+                      "Bj_6_11_skim",
+                      "Bj_11_18_skim",
+                      "Bj_18_27_skim",
+                      "Bj_27_37_skim",
+                      "Bj_37_1k_skim",
+                      "tB_0_5_skim",
+                      "tB_5_9_skim",
+                      "tB_9_15_skim",
+                      "tB_15_22_skim",
+                      "tB_22_1k_skim",
+                      "ttB_0_9_skim",
+                      "ttB_9_16_skim",
+                      "ttB_16_25_skim",
+                      "ttB_25_1k_skim",
+                      "H_0_3_skim",
+                      "H_3_8_skim",
+                      "H_8_15_skim",
+                      "H_15_1k_skim",
+                      "Bjj_0_7_skim",
+                      "Bjj_7_14_skim",
+                      "Bjj_14_23_skim",
+                      "Bjj_23_34_skim",
+                      "LL_0_1_skim",
+                      "LL_1_2_skim",
+                      "LL_2_5_skim",
+                      "LL_5_9_skim",
+                      "LL_9_14_skim",
+                      "LL_14_1k_skim",
+                      "LLB_0_4_skim",
+                      "LLB_4_9_skim",
+                      "LLB_9_1k_skim",
+                      "tj_0_5_skim",
+                      "tj_5_10_skim",
+                      "tj_10_16_skim",
+                      "tj_16_24_skim",
+                      "tj_24_1k_skim",
+                      ]
 
-                specify(names="BBB_%s_0_6_skim" % c, weights=w, effectiveLumi=el) +
-                specify(names="BBB_%s_6_13_skim" % c, weights=w, effectiveLumi=el) +
-                specify(names="BBB_%s_13_1k_skim" % c, weights=w, effectiveLumi=el) +
+        names += ["BB_%s_0_3_skim" % c,
+                  "BB_%s_3_7_skim" % c,
+                  "BB_%s_7_13_skim" % c,
+                  "BB_%s_13_21_skim" % c,
+                  "BB_%s_21_1k_skim" % c,
+                  "BBB_%s_0_6_skim" % c,
+                  "BBB_%s_6_13_skim" % c,
+                  "BBB_%s_13_1k_skim" % c,
+                  ]
 
-                #specify(names="tt_0_6",   weights=w) + #, nEventsMax=n) +
-                #specify(names="tt_6_11",  weights=w) + #, nEventsMax=n) +
-                #specify(names="tt_11_17", weights=w) + #, effectiveLumi=40/fb) +
-                #specify(names="tt_17_25", weights=w) + #, nEventsMax=n) + #effectiveLumi=20/fb) +
-                #specify(names="tt_25_1k", weights=w) + #, nEventsMax=n) + #effectiveLumi=200/fb) +
-                #specify(names="hh_bbtt_c4_10", effectiveLumi=el) +
-                #specify(names="hh_bbtt_c4_20", effectiveLumi=el) +
-                []
-                )
+        for name in names:
+            out += specify(names=name, weights=w, effectiveLumi=el)
+
+        return out
 
 
     def conclude(self, pars):
@@ -143,38 +184,64 @@ class reco(supy.analysis):
         def gopts(name="", color=1):
             return {"name":name, "color":color, "markerStyle":1, "lineWidth":2, "goptions":"ehist"}
 
-        #org.mergeSamples(targetSpec=gopts("tt_0_6",   r.kBlue),    sources=["tt_0_6.GenWeight"])
-        #org.mergeSamples(targetSpec=gopts("tt_6_11",  r.kGreen),   sources=["tt_6_11.GenWeight"])
-        #org.mergeSamples(targetSpec=gopts("tt_11_17", r.kCyan),    sources=["tt_11_17.GenWeight"])
-        #org.mergeSamples(targetSpec=gopts("tt_17_25", r.kMagenta), sources=["tt_17_25.GenWeight"])
-        #org.mergeSamples(targetSpec=gopts("tt_25_1k", r.kOrange),  sources=["tt_25_1k.GenWeight"])
-
-        #org.mergeSamples(targetSpec=gopts("hh_bbtt_c4_10", r.kRed), sources=["hh_bbtt_c4_10"])
-        #org.mergeSamples(targetSpec=gopts("hh_bbtt", r.kRed), sources=["hh_bbtt_c4_20"])
-
-        keep = False
         c = pars["tag"]
-        org.mergeSamples(targetSpec=gopts("tt_0_6",   r.kBlue),    sources=["tt_%s_0_6_skim.GenWeight" % c])
-        org.mergeSamples(targetSpec=gopts("tt_6_11",  r.kGreen),   sources=["tt_%s_6_11_skim.GenWeight" % c])
-        org.mergeSamples(targetSpec=gopts("tt_11_17", r.kCyan),    sources=["tt_%s_11_17_skim.GenWeight" % c])
-        org.mergeSamples(targetSpec=gopts("tt_17_25", r.kMagenta), sources=["tt_%s_17_25_skim.GenWeight" % c])
-        org.mergeSamples(targetSpec=gopts("tt_25_1k", r.kOrange),  sources=["tt_%s_25_1k_skim.GenWeight" % c])
-        org.mergeSamples(targetSpec=gopts("tt", r.kBlack), allWithPrefix="tt_", keepSources=keep)
-
-        org.mergeSamples(targetSpec=gopts("BB_0_3",   r.kBlue),    sources=["BB_%s_0_3_skim.GenWeight" % c])
-        org.mergeSamples(targetSpec=gopts("BB_3_7",  r.kGreen),    sources=["BB_%s_3_7_skim.GenWeight" % c])
-        org.mergeSamples(targetSpec=gopts("BB_7_13", r.kCyan),     sources=["BB_%s_7_13_skim.GenWeight" % c])
-        org.mergeSamples(targetSpec=gopts("BB_13_21", r.kMagenta), sources=["BB_%s_13_21_skim.GenWeight" % c])
-        org.mergeSamples(targetSpec=gopts("BB_21_1k", r.kOrange),  sources=["BB_%s_21_1k_skim.GenWeight" % c])
-        org.mergeSamples(targetSpec=gopts("BB", r.kBlue), allWithPrefix="BB_", keepSources=keep)
-
-        org.mergeSamples(targetSpec=gopts("BBB_0_6",  r.kBlue),    sources=["BBB_%s_0_6_skim.GenWeight" % c])
-        org.mergeSamples(targetSpec=gopts("BBB_6_13", r.kGreen),   sources=["BBB_%s_6_13_skim.GenWeight" % c])
-        org.mergeSamples(targetSpec=gopts("BBB_13_1k", r.kCyan),   sources=["BBB_%s_13_1k_skim.GenWeight" % c])
-        org.mergeSamples(targetSpec=gopts("BBB", r.kCyan), allWithPrefix="BBB_", keepSources=keep)
-        
         org.mergeSamples(targetSpec=gopts("hh_bb#tau#tau", r.kRed), sources=["hh_bbtt_%s_20_skim" % c])
-        
+
+        keep = pars["keepSources"]
+
+        if keep:
+            org.mergeSamples(targetSpec=gopts("tt_0_6",   r.kBlue),    sources=["tt_%s_0_6_skim.GenWeight" % c])
+            org.mergeSamples(targetSpec=gopts("tt_6_11",  r.kGreen),   sources=["tt_%s_6_11_skim.GenWeight" % c])
+            org.mergeSamples(targetSpec=gopts("tt_11_17", r.kCyan),    sources=["tt_%s_11_17_skim.GenWeight" % c])
+            org.mergeSamples(targetSpec=gopts("tt_17_25", r.kMagenta), sources=["tt_%s_17_25_skim.GenWeight" % c])
+            org.mergeSamples(targetSpec=gopts("tt_25_1k", r.kOrange),  sources=["tt_%s_25_1k_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("tt", r.kBlue), allWithPrefix="tt_", keepSources=keep)
+
+        bj = ["B_skim", "Bj_0_3_skim","Bj_3_6_skim", "Bj_6_11_skim", "Bj_11_18_skim",
+               "Bj_18_27_skim", "Bj_27_37_skim", "Bj_37_1k_skim"]
+        org.mergeSamples(targetSpec=gopts("Bj", r.kGreen), sources=[x+".GenWeight" for x in bj], keepSources=keep)
+
+        tb = ["tB_0_5_skim", "tB_5_9_skim", "tB_9_15_skim", "tB_15_22_skim", "tB_22_1k_skim"]
+        org.mergeSamples(targetSpec=gopts("tB", r.kCyan), sources=[x+".GenWeight" for x in tb], keepSources=keep)
+
+        ttb = ["ttB_0_9_skim", "ttB_9_16_skim", "ttB_16_25_skim", "ttB_25_1k_skim"]
+        org.mergeSamples(targetSpec=gopts("ttB", r.kBlue-8), sources=[x+".GenWeight" for x in ttb], keepSources=keep)
+
+        h = ["H_0_3_skim", "H_3_8_skim", "H_8_15_skim", "H_15_1k_skim"]
+        org.mergeSamples(targetSpec=gopts("H", r.kOrange-3), sources=[x+".GenWeight" for x in h], keepSources=keep)
+
+        if keep:
+            org.mergeSamples(targetSpec=gopts("BB_0_3",   r.kBlue),    sources=["BB_%s_0_3_skim.GenWeight" % c])
+            org.mergeSamples(targetSpec=gopts("BB_3_7",  r.kGreen),    sources=["BB_%s_3_7_skim.GenWeight" % c])
+            org.mergeSamples(targetSpec=gopts("BB_7_13", r.kCyan),     sources=["BB_%s_7_13_skim.GenWeight" % c])
+            org.mergeSamples(targetSpec=gopts("BB_13_21", r.kMagenta), sources=["BB_%s_13_21_skim.GenWeight" % c])
+            org.mergeSamples(targetSpec=gopts("BB_21_1k", r.kOrange),  sources=["BB_%s_21_1k_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("BB", r.kBlack), allWithPrefix="BB_", keepSources=keep)
+
+        if keep:
+            org.mergeSamples(targetSpec=gopts("BBB_0_6",  r.kBlue),    sources=["BBB_%s_0_6_skim.GenWeight" % c])
+            org.mergeSamples(targetSpec=gopts("BBB_6_13", r.kGreen),   sources=["BBB_%s_6_13_skim.GenWeight" % c])
+            org.mergeSamples(targetSpec=gopts("BBB_13_1k", r.kCyan),   sources=["BBB_%s_13_1k_skim.GenWeight" % c])
+        org.mergeSamples(targetSpec=gopts("BBB", r.kBlack), allWithPrefix="BBB_", keepSources=keep)
+
+        bjj = ["Bjj_0_7_skim", "Bjj_7_14_skim", "Bjj_14_23_skim", "Bjj_23_34_skim"]
+        org.mergeSamples(targetSpec=gopts("Bjj", r.kYellow), sources=[x+".GenWeight" for x in bjj], keepSources=keep)
+
+        ll = ["LL_0_1_skim", "LL_1_2_skim", "LL_2_5_skim", "LL_5_9_skim", "LL_9_14_skim", "LL_14_1k_skim"]
+        org.mergeSamples(targetSpec=gopts("LL", r.kBlack), sources=[x+".GenWeight" for x in ll], keepSources=keep)
+
+        llb = ["LLB_0_4_skim", "LLB_4_9_skim", "LLB_9_1k_skim"]
+        org.mergeSamples(targetSpec=gopts("LLB", r.kBlack), sources=[x+".GenWeight" for x in llb], keepSources=keep)
+
+        tj = ["tj_0_5_skim", "tj_5_10_skim", "tj_10_16_skim", "tj_16_24_skim", "tj_24_1k_skim"]
+        org.mergeSamples(targetSpec=gopts("tj", r.kPink), sources=[x+".GenWeight" for x in tj], keepSources=keep)
+
+        others = ["BB", "BBB", "Bjj", "LL", "LLB", "tj"]
+        org.mergeSamples(targetSpec=gopts("others", r.kMagenta), sources=others, keepSources=False)
+
+        sm = ["tt", "Bj", "tB", "ttB", "H", "others"]
+        org.mergeSamples(targetSpec=gopts("SM", r.kBlack), sources=sm, keepSources=True)
+
         org.scale(3.e3/fb)
         #org.scale(toPdf=True)
 
@@ -192,8 +259,8 @@ class reco(supy.analysis):
                      #fitFunc=self.profFit,
                      showStatBox=False,
                      latexYieldTable=False,
-                     samplesForRatios=("hh_bb#tau#tau", "tt"),
-                     sampleLabelsForRatios=("hh", "tt"),
+                     samplesForRatios=("hh_bb#tau#tau", "SM"),
+                     sampleLabelsForRatios=("hh", "SM"),
                      foms=[{"value": lambda x, y: x/y,
                             "uncRel": lambda x, y, xUnc, yUnc: math.sqrt((xUnc/x)**2 + (yUnc/y)**2),
                             "label": lambda x, y:"%s/%s" % (x, y),
