@@ -29,25 +29,25 @@ class reco(supy.analysis):
                 supy.steps.filters.multiplicity("tauTagged_bTagged_Jets_mask1", max=0),
 
                 #supy.steps.histos.mass("bTagged_Jets_mask1_SumP4",              50, 0.0, 250.0),
-                #supy.steps.histos.mass("JetsFixedMass_bTagged_SumP4",           50, 0.0, 250.0),
-                supy.steps.histos.mass("JetsFixedMass_bTagged_Corrected_SumP4", 50, 0.0, 250.0),
-                supy.steps.filters.mass("JetsFixedMass_bTagged_Corrected_SumP4", min=100.0, max=140.0),
-                supy.steps.histos.mass("JetsFixedMass_bTagged_Corrected_SumP4", 50, 0.0, 250.0),
+                #supy.steps.histos.mass("Jets_bTagged_FixedMass_SumP4",          50, 0.0, 250.0),
+                supy.steps.histos.mass("Jets_bTagged_FixedMass_Corrected_SumP4", 50, 0.0, 250.0),
+                supy.steps.filters.mass("Jets_bTagged_FixedMass_Corrected_SumP4", min=100.0, max=140.0),
+                supy.steps.histos.mass("Jets_bTagged_FixedMass_Corrected_SumP4", 50, 0.0, 250.0),
                 
                 #supy.steps.histos.mass("tauTagged_Jets_SumP4",                    50, 0.0, 250.0),
-                #supy.steps.histos.mass("JetsFixedMass_tauTagged_SumP4",           50, 0.0, 250.0),
-                supy.steps.histos.mass("JetsFixedMass_tauTagged_Corrected_SumP4", 25, 0.0, 250.0),
-                supy.steps.filters.mass("JetsFixedMass_tauTagged_Corrected_SumP4", min=75.0, max=125.0),
-                supy.steps.histos.mass("JetsFixedMass_tauTagged_Corrected_SumP4", 50, 0.0, 250.0),
+                #supy.steps.histos.mass("Jets_tauTagged_FixedMass_SumP4",          50, 0.0, 250.0),
+                supy.steps.histos.mass("Jets_tauTagged_FixedMass_Corrected_SumP4", 25, 0.0, 250.0),
+                supy.steps.filters.mass("Jets_tauTagged_FixedMass_Corrected_SumP4", min=75.0, max=125.0),
+                supy.steps.histos.mass("Jets_tauTagged_FixedMass_Corrected_SumP4", 50, 0.0, 250.0),
 
-                supy.steps.histos.mass("bbtt_LvSumP4", 32, 0.0, 800.0),
-                supy.steps.filters.mass("bbtt_LvSumP4", min=350.0),
+                supy.steps.histos.mass("bbtt_SumP4", 32, 0.0, 800.0),
+                supy.steps.filters.mass("bbtt_SumP4", min=350.0),
                 
-                supy.steps.histos.pt("JetsFixedMass_bTagged_Corrected_SumP4", 12, 0.0, 300.0),
-                supy.steps.filters.pt("JetsFixedMass_bTagged_Corrected_SumP4", min=100.0),
+                supy.steps.histos.pt("Jets_bTagged_FixedMass_Corrected_SumP4", 12, 0.0, 300.0),
+                supy.steps.filters.pt("Jets_bTagged_FixedMass_Corrected_SumP4", min=100.0),
                 
-                supy.steps.histos.pt("JetsFixedMass_tauTagged_Corrected_SumP4", 12, 0.0, 300.0),
-                supy.steps.filters.pt("JetsFixedMass_tauTagged_Corrected_SumP4", min=100.0),
+                supy.steps.histos.pt("Jets_tauTagged_FixedMass_Corrected_SumP4", 12, 0.0, 300.0),
+                supy.steps.filters.pt("Jets_tauTagged_FixedMass_Corrected_SumP4", min=100.0),
 
                 supy.steps.histos.multiplicity("bParticles"),
                 supy.steps.histos.multiplicity("tauParticles"),
@@ -77,21 +77,21 @@ class reco(supy.analysis):
 
                               # mbb
                               calculables.SumP4("bTagged_Jets_mask1"),
-                              calculables.JetsFixedMass("bTagged_Jets_mask1", m=mb, label="bTagged"),
-                              calculables.SumP4("JetsFixedMass_bTagged"),
-                              calculables.JetsFixedMass("bTagged_Jets_mask1", m=mb, correctPt=True, label="bTagged"),
-                              calculables.SumP4("JetsFixedMass_bTagged_Corrected"),
+                              calculables.Jets("bTagged_Jets_mask1", mFixed=mb, label="bTagged"),
+                              calculables.Jets("bTagged_Jets_mask1", mFixed=mb, label="bTagged", correctPt=True),
+                              calculables.LvSumP4("Jets_bTagged_FixedMass"),
+                              calculables.LvSumP4("Jets_bTagged_FixedMass_Corrected"),
 
                               # mtt
                               calculables.SumP4("tauTagged_Jets"),
-                              calculables.JetsFixedMass("tauTagged_Jets", m=mtau, label="tauTagged"),
-                              calculables.SumP4("JetsFixedMass_tauTagged"),
-                              calculables.JetsFixedMass("tauTagged_Jets", m=mtau, correctPt=True, label="tauTagged"),
-                              calculables.SumP4("JetsFixedMass_tauTagged_Corrected"),
+                              calculables.Jets("tauTagged_Jets", mFixed=mtau, label="tauTagged"),
+                              calculables.SumP4("Jets_tauTagged"),
+                              calculables.Jets("tauTagged_Jets", mFixed=mtau, correctPt=True, label="tauTagged"),
+                              calculables.SumP4("Jets_tauTagged_FixedMass_Corrected"),
 
                               # mbbtt
-                              calculables.LvSumP4(label="bbtt", keys=["JetsFixedMass_bTagged_Corrected_SumP4",
-                                                                      "JetsFixedMass_tauTagged_Corrected_SumP4"]),
+                              calculables.LvMultiSumP4(label="bbtt", keys=["Jets_bTagged_FixedMass_Corrected_SumP4",
+                                                                           "Jets_tauTagged_FixedMass_Corrected_SumP4"]),
                               ]
         return listOfCalculables
 
@@ -111,7 +111,8 @@ class reco(supy.analysis):
         out = []
         #out += specify(names="hh_bbtt_%s_10_skim" % c)
         out += specify(names="hh_bbtt_%s_20_skim" % c)
-                
+        return out
+
         names = ["tt_%s_0_6_skim" % c,
                  "tt_%s_6_11_skim" % c,
                  "tt_%s_11_17_skim" % c,
