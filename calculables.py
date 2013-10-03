@@ -36,6 +36,15 @@ class GenWeight(supy.wrappedChain.calculable):
         self.value = self.source["Event"][0].Weight
 
 
+class MET(supy.wrappedChain.calculable):
+    def __init__(self):
+        self.value = supy.utils.LorentzV()
+
+    def update(self, _):
+        m = self.source["MissingET"][0]
+        self.value.SetCoordinates(m.MET, 0.0, m.Phi, 0.0)
+
+
 class HT(supy.wrappedChain.calculable):
     def update(self, _):
         self.value = self.source["ScalarHT"][0].HT
@@ -92,7 +101,22 @@ class SumP4(supy.wrappedChain.calculable):
 class LvSumP4(supy.wrappedChain.calculable):
     @property
     def name(self):
-        return "%s_LvSumP4" % self.label
+        return "%s_SumP4" % self.key
+
+    def __init__(self, key=""):
+        self.key = key
+        self.value = supy.utils.LorentzV()
+
+    def update(self, _):
+        self.value.SetCoordinates(0.0, 0.0, 0.0, 0.0)
+        for item in self.source[self.key]:
+            self.value += item
+
+
+class LvMultiSumP4(supy.wrappedChain.calculable):
+    @property
+    def name(self):
+        return "%s_SumP4" % self.label
 
     def __init__(self, label="", keys=[]):
         for item in ["label", "keys"]:
@@ -276,29 +300,39 @@ class Duplicates(supy.wrappedChain.calculable):
                     self.value.append((j1, j2))
 
 
-class JetsFixedMass(supy.wrappedChain.calculable):
+class Jets(supy.wrappedChain.calculable):
     @property
     def name(self):
-        return "JetsFixedMass_%s%s" % (self.label, "_Corrected" if self.correctPt else "")
+        return self.__name
 
-    def __init__(self, key="", m=None, correctPt=False, label=""):
-        assert m is not None
-        for item in ["key", "m", "correctPt", "label"]:
+    def __init__(self, key="", mFixed=None, correctPt=False, label="", nMax=2):
+        for item in ["key", "mFixed", "correctPt", "nMax"]:
             setattr(self, item, eval(item))
-        self.lv = [supy.utils.LorentzV(), supy.utils.LorentzV()]
+
+        self.__name =  "Jets"
+        if label:
+            self.__name += "_"+label
+        if self.mFixed:
+            self.__name += "_FixedMass"
+        if self.correctPt:
+            self.__name += "_Corrected"
+
+        self.value = []
+        for i in range(self.nMax):
+            self.value.append(supy.utils.LorentzV())
 
     def update(self, _):
-        self.value = []
         jets = self.source[self.key]
-        assert len(jets) == 2, len(jets)
+        assert len(jets) <= self.nMax, len(jets)
         assert all(jets), jets
-        for i in range(2):
+        for i in range(self.nMax):
             pt = jets[i].PT
             eta = jets[i].Eta
+            phi = jets[i].Phi
+            m = jets[i].Mass if self.mFixed is None else self.mFixed
             if self.correctPt:
                 pt *= self.source["jecFactor"](pt, eta)
-            self.lv[i].SetCoordinates(pt, eta, jets[i].Phi, self.m)
-        self.value = self.lv
+            self.value[i].SetCoordinates(pt, eta, phi, m)
 
 
 class Category(supy.wrappedChain.calculable):
@@ -352,6 +386,7 @@ class minPt(supy.wrappedChain.calculable):
     def update(self, _):
         values = [x.PT for x in self.source[self.key]]
         self.value = min(values) if values else None
+
 
 class minItem(supy.wrappedChain.calculable):
     @property
